@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MiniRxDemo by Hristo M. Stefanov</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="refresh">Refresh</string>
+</resources>
