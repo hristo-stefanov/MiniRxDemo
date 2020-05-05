@@ -21,14 +21,9 @@ class MainViewModel @Inject constructor(
     val postList: Observable<List<PostFace>>
     val errorMessage: Observable<String>
 
-    // the set of Observables that can observed is dynamic hence a Subject is used
-    private val _refreshSubject = PublishSubject.create<Object>()
-    val refreshObserver: Observer<Object> = _refreshSubject
-
-    // TODO make the view utilize refreshObserver instead of this method
-    fun onRefresh() {
-        _refreshSubject.onNext(Object())
-    }
+    // the set of Observables that can be observed is dynamic hence a Subject is used
+    private val _refreshSubject = PublishSubject.create<Unit>()
+    val refreshObserver: Observer<Unit> = _refreshSubject
 
     init {
         // infinite observable

@@ -5,6 +5,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jakewharton.rxbinding3.view.clicks
 import hristostefanov.minirxdemo.App
 import hristostefanov.minirxdemo.R
 import hristostefanov.minirxdemo.presentation.MainViewModel
@@ -25,9 +26,7 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
 
-        refreshButton.setOnClickListener {
-            viewModel.onRefresh()
-        }
+        refreshButton.clicks().subscribe(viewModel.refreshObserver)
     }
 
     override fun onStart() {
