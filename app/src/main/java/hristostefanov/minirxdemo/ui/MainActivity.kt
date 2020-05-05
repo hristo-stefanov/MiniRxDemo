@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
         ViewModelFactory((application as App).component)
     }
 
-    private val _compositeDisposable = CompositeDisposable()
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,18 +33,18 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        _compositeDisposable.add(viewModel.errorMessage.observeOn(AndroidSchedulers.mainThread()).subscribe{
+        compositeDisposable.add(viewModel.errorMessage.observeOn(AndroidSchedulers.mainThread()).subscribe{
             messageTextView.text = it
             messageTextView.visibility = if (it.isBlank()) View.GONE else View.VISIBLE
         })
 
-        _compositeDisposable.add(viewModel.postList.observeOn(AndroidSchedulers.mainThread()).subscribe {
+        compositeDisposable.add(viewModel.postList.observeOn(AndroidSchedulers.mainThread()).subscribe {
             recyclerView.adapter = PostAdapter(it)
         })
     }
 
     override fun onStop() {
-        _compositeDisposable.dispose()
+        compositeDisposable.dispose()
         super.onStop()
     }
 }
