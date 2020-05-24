@@ -9,11 +9,9 @@ import io.reactivex.disposables.CompositeDisposable
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat
 import org.junit.Test
-import org.mockito.BDDMockito
 import org.mockito.BDDMockito.*
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
-import java.util.concurrent.atomic.AtomicInteger
 
 
 class MainViewModelTest {
@@ -38,7 +36,7 @@ class MainViewModelTest {
         given(interactor.query()).willReturn(Single.just(emptyList()))
         val viewModelUnderTest = MainViewModel(interactor, stringSupplier)
 
-        viewModelUnderTest.onRefresh()
+        viewModelUnderTest.refreshObserver.onNext(Unit)
 
         then(interactor).should(Mockito.times(2)).query()
         then(interactor).shouldHaveNoMoreInteractions()

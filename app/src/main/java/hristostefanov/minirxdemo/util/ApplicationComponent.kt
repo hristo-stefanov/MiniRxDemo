@@ -1,12 +1,17 @@
 package hristostefanov.minirxdemo.util
 
+import android.app.Application
+import dagger.BindsInstance
 import dagger.Component
 import hristostefanov.minirxdemo.presentation.MainViewModel
-import hristostefanov.minirxdemo.ui.ViewModelFactory
 
 @ApplicationScope
 @Component(modules = [ApplicationModule::class])
 interface ApplicationComponent {
-    fun getViewModelFactory(): ViewModelFactory
+    @Component.Factory
+    interface Factory {
+        fun create(@BindsInstance app: Application): ApplicationComponent
+    }
+
     fun getMainViewModel(): MainViewModel
 }
