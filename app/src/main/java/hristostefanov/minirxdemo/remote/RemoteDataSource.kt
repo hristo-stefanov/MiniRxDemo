@@ -7,22 +7,20 @@ import io.reactivex.Single
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class RemoteDataSource @Inject constructor(private val service: Service) : DataSource {
-    override fun getAllPosts(): Single<List<Post>> {
+class RemoteDataSource @Inject constructor(private val service: Service) {
+    fun getAllPosts(): Single<List<Post>> {
         return service.getAllPosts()
-            .subscribeOn(Schedulers.io())
             .map {
                 it.map { postDTO ->
-                    Post(postDTO.title, postDTO.userId)
+                    Post(postDTO.id, postDTO.title, postDTO.body, postDTO.userId)
                 }
             }
     }
 
-    override fun getUserById(userId: Int): Single<User> {
+    fun getUserById(userId: Int): Single<User> {
         return service.getUserById(userId)
-            .subscribeOn(Schedulers.io())
             .map {
-                User(it.username)
+                User(it.id, it.username)
             }
     }
 }
