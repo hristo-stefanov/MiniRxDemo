@@ -6,14 +6,16 @@ import hristostefanov.minirxdemo.presentation.MainViewModel
 import hristostefanov.minirxdemo.util.StringSupplier
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat
 import org.junit.Test
 import org.mockito.BDDMockito.*
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
+import java.lang.Thread.sleep
 
-
+private const val TIMEOUT = 200L
 class MainViewModelTest {
     private val interactor = mock(ListTenFirstPostsInteractor::class.java)
     private val stringSupplier = object : StringSupplier {
@@ -51,9 +53,19 @@ class MainViewModelTest {
         val postListObserver = viewModelUnderTest.postList.test()
         val errorMessageObserver = viewModelUnderTest.errorMessage.test()
 
-
+        sleep(TIMEOUT) // wait enough for the I/O to assert observers not terminated
         postListObserver.assertValueCount(1).assertNotTerminated()
         errorMessageObserver.assertValueCount(1).assertNotTerminated()
+    }
+
+    @Test
+    fun `Subscribe upstream on IO scheduler`() {
+        val observableSpy = Mockito.spy(Single.just<List<PostInfo>>(emptyList()))
+        given(interactor.query()).willReturn(observableSpy)
+
+        MainViewModel(interactor, stringSupplier)
+
+        then(observableSpy).should().subscribeOn(Schedulers.io())
     }
 
     @Test
@@ -87,6 +99,7 @@ class MainViewModelTest {
 
         val postListObserver = viewModelUnderTest.postList.test()
 
+        postListObserver.awaitCount(1)
         assertThat(postListObserver.values()[0][0].title, equalTo("Title"))
         assertThat(postListObserver.values()[0][0].username, equalTo("@username"))
     }
@@ -100,6 +113,6 @@ class MainViewModelTest {
         // subscribe to both to trigger the query
         val errorMessageObserver = viewModelUnderTest.errorMessage.test()
 
-        errorMessageObserver.assertValue("error details")
+        errorMessageObserver.awaitCount(1).assertValue("error details")
     }
 }

@@ -8,6 +8,7 @@ import hristostefanov.minirxdemo.util.Either
 import hristostefanov.minirxdemo.util.StringSupplier
 import io.reactivex.Observable
 import io.reactivex.Observer
+import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
@@ -31,6 +32,7 @@ class MainViewModel @Inject constructor(
 
         trigger.flatMapSingle {
             listTenFirstPostsInteractor.query()
+                .subscribeOn(Schedulers.io())
                 // wrap both data and error emissions in data emissions of Either to prevent
                 // the error emission from terminating the Observable returned by flatMap
                 .map<Either<String, List<PostInfo>>> {

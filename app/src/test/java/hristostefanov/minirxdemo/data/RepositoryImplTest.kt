@@ -1,16 +1,15 @@
 package hristostefanov.minirxdemo.data
 
 import hristostefanov.minirxdemo.any
-import hristostefanov.minirxdemo.business.DataSource
 import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.persistence.PersistedDataSource
 import hristostefanov.minirxdemo.remote.RemoteDataSource
-import io.reactivex.*
+import io.reactivex.Maybe
+import io.reactivex.MaybeObserver
+import io.reactivex.Single
+import io.reactivex.SingleObserver
 import org.junit.Test
 import org.mockito.BDDMockito.*
-import org.mockito.Mockito
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.spy
 
 class RepositoryImplTest {
     private val remoteDataSource = mock(RemoteDataSource::class.java)
@@ -30,13 +29,9 @@ class RepositoryImplTest {
 
         val observer = repositoryUnderTest.getAllPosts().test()
 
-        observer.assertValue(listOf(post1,post2))
-        then(persistentObservable).should().toObservable()
+        observer.assertValue(listOf(post1, post2))
         then(persistentObservable).should().subscribe(any<MaybeObserver<List<Post>>>())
-        // actually #subscribeActual() is also invoked (by #subscribe())
-        // then(persistentObservable).shouldHaveNoMoreInteractions()
-        then(remoteObservable).should().toObservable()
-        then(remoteObservable).shouldHaveNoMoreInteractions()
+        then(remoteObservable).should(times(0)).subscribe(any<SingleObserver<List<Post>>>())
     }
 
     @Test
@@ -48,15 +43,9 @@ class RepositoryImplTest {
         val repositoryUnderTest = RepositoryImpl(remoteDataSource, persistentDataSource);
 
         val observer = repositoryUnderTest.getAllPosts().test()
-        observer.assertValue(listOf(post1,post2))
+        observer.assertValue(listOf(post1, post2))
 
-        then(persistentObservable).should().toObservable()
         then(persistentObservable).should().subscribe(any<MaybeObserver<List<Post>>>())
-        // actually #subscribeActual() is also invoked (by #subscribe())  but it's protected
-        // then(persistentObservable).shouldHaveNoMoreInteractions()
-        then(remoteObservable).should().toObservable()
         then(remoteObservable).should().subscribe(any<SingleObserver<List<Post>>>())
-        // actually #subscribeActual() is also invoked (by #subscribe()) but it's protected
-        // then(remoteObservable).shouldHaveNoMoreInteractions()
     }
 }

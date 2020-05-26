@@ -31,13 +31,13 @@ class RepositoryImpl @Inject constructor(
             remoteDataSource.getAllPosts().toObservable().doOnNext {
                 persistentDataSource.savePosts(it)
             }
-        ).firstElement().toSingle().subscribeOn(Schedulers.io())
+        ).firstElement().toSingle()
     }
 
     override fun getUserById(userId: Int): Single<User> {
         return Observable.concat(persistentDataSource.getUserById(userId).toObservable(),
             remoteDataSource.getUserById(userId).doOnSuccess {
                 persistentDataSource.saveUser(it)
-            }.toObservable()).firstElement().toSingle().subscribeOn(Schedulers.io())
+            }.toObservable()).firstElement().toSingle()
     }
 }
