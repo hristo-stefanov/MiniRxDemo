@@ -10,6 +10,8 @@ interface PostDAO {
     @Query("SELECT * FROM post")
     fun getAll(): Observable<List<PostEntity>>
 
+    // TODO consider returning Completable for the follw
+
     @Insert
     fun insert(list: List<PostEntity>)
 

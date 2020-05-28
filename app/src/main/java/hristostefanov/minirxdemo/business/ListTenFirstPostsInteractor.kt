@@ -8,6 +8,7 @@ private const val MAX_POST_COUNT = 10
 
 class ListTenFirstPostsInteractor @Inject constructor(private val repository: Repository) {
     fun query(): Observable<List<PostInfo>> {
+        // TODO in transaction?
         return repository.getAllPosts()
             .concatMapSingle { posts: List<Post> ->
                 Observable.fromIterable(posts.take(MAX_POST_COUNT)).concatMapSingle { post: Post ->

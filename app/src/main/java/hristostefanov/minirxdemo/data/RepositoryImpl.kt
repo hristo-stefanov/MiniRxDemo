@@ -1,18 +1,15 @@
 package hristostefanov.minirxdemo.data
 
-import hristostefanov.minirxdemo.business.DataSource
 import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.business.Repository
 import hristostefanov.minirxdemo.business.User
+import hristostefanov.minirxdemo.persistence.Database
 import hristostefanov.minirxdemo.persistence.PersistedDataSource
 import hristostefanov.minirxdemo.remote.RemoteDataSource
 import io.reactivex.Completable
-import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
-import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
-import javax.inject.Named
 
 // See
 // https://blog.danlew.net/2015/06/22/loading-data-from-multiple-sources-with-rxjava/
@@ -24,7 +21,8 @@ import javax.inject.Named
 
 class RepositoryImpl @Inject constructor(
     private val remoteDataSource: RemoteDataSource,
-    private val persistentDataSource: PersistedDataSource
+    private val persistentDataSource: PersistedDataSource,
+    private val database: Database
 ) : Repository {
 
     override fun getAllPosts(): Observable<List<Post>> {
@@ -37,6 +35,7 @@ class RepositoryImpl @Inject constructor(
 
     override fun refresh(): Completable {
         // TODO fetch only needed Users
+        // TODO consider error handling
         val pair: Single<Pair<List<Post>, List<User>>> = remoteDataSource.getAllPosts().flatMap { posts ->
             remoteDataSource.getAllUsers().map {users ->
                 Pair(posts, users)
@@ -44,9 +43,11 @@ class RepositoryImpl @Inject constructor(
 
         }
         return pair.doOnSuccess {
-            persistentDataSource.clear();
-            persistentDataSource.savePosts(it.first)
-            persistentDataSource.saveUsers(it.second)
+            database.runInTransaction {
+                persistentDataSource.clear();
+                persistentDataSource.savePosts(it.first)
+                persistentDataSource.saveUsers(it.second)
+            }
         }.ignoreElement()
     }
 }

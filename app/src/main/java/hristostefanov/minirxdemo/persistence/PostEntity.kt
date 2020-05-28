@@ -6,13 +6,13 @@ import androidx.room.ForeignKey.CASCADE
 @Entity(
     tableName = "post",
     // for referential integrity, generates a a FOREIGN KEY constraint
-    // TODO fails
-/*    foreignKeys = [
+    foreignKeys = [
         ForeignKey(
             childColumns = ["userId"], entity = UserEntity::class, parentColumns = ["id"],
+            deferred = true,
             onDelete = CASCADE, onUpdate = CASCADE
         )
-    ], */
+    ],
     // for faster check of referential integrity
     indices = [Index("userId")]
 )
