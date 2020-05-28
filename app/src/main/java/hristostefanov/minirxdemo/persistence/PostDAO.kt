@@ -12,4 +12,7 @@ interface PostDAO {
 
     @Insert
     fun insert(list: List<PostEntity>)
+
+    @Query("DELETE FROM post")
+    fun deleteAll()
 }

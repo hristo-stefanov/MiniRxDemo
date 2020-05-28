@@ -8,6 +8,9 @@ interface Service {
     @GET("/posts")
     fun getAllPosts(): Single<List<PostDTO>>
 
+    @GET("/users")
+    fun getAllUsers(): Single<List<UserDTO>>
+
     @GET("/users/{id}")
     fun getUserById(@Path("id") userId: Int): Single<UserDTO>
 }

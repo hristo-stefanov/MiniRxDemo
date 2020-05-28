@@ -4,6 +4,7 @@ import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.business.User
 import io.reactivex.Maybe
 import io.reactivex.Observable
+import io.reactivex.Single
 import javax.inject.Inject
 
 class PersistedDataSource @Inject constructor(private val database: Database) {
@@ -16,7 +17,7 @@ class PersistedDataSource @Inject constructor(private val database: Database) {
             }
     }
 
-    fun getUserById(userId: Int): Maybe<User> {
+    fun getUserById(userId: Int): Single<User> {
         return database.userDao().getUserById(userId).map {
             User(it.id, it.username)
         }
@@ -28,7 +29,18 @@ class PersistedDataSource @Inject constructor(private val database: Database) {
         })
     }
 
+    fun saveUsers(users: List<User>) {
+        database.userDao().insert(users.map {
+            UserEntity(it.id, it.username)
+        })
+    }
+
     fun saveUser(user: User) {
         database.userDao().insert(UserEntity(user.id, user.username))
+    }
+
+    fun clear() {
+        database.userDao().deleteAll()
+        database.postDao().deleteAll()
     }
 }

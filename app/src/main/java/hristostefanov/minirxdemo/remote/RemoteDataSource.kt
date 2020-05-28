@@ -17,6 +17,12 @@ class RemoteDataSource @Inject constructor(private val service: Service) {
             }
     }
 
+    fun getAllUsers(): Single<List<User>> = service.getAllUsers().map { list ->
+        list.map {
+            User(it.id, it.username)
+        }
+    }
+
     fun getUserById(userId: Int): Single<User> {
         return service.getUserById(userId)
             .map {

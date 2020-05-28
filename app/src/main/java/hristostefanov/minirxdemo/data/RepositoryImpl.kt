@@ -25,21 +25,28 @@ import javax.inject.Named
 class RepositoryImpl @Inject constructor(
     private val remoteDataSource: RemoteDataSource,
     private val persistentDataSource: PersistedDataSource
-): Repository {
+) : Repository {
+
     override fun getAllPosts(): Observable<List<Post>> {
         return persistentDataSource.getAllPosts()
     }
 
     override fun getUserById(userId: Int): Single<User> {
-        return Observable.concat(persistentDataSource.getUserById(userId).toObservable(),
-            remoteDataSource.getUserById(userId).doOnSuccess {
-                persistentDataSource.saveUser(it)
-            }.toObservable()).firstElement().toSingle()
+        return persistentDataSource.getUserById(userId)
     }
 
     override fun refresh(): Completable {
-        return remoteDataSource.getAllPosts().doOnSuccess {
-            persistentDataSource.savePosts(it)
+        // TODO fetch only needed Users
+        val pair: Single<Pair<List<Post>, List<User>>> = remoteDataSource.getAllPosts().flatMap { posts ->
+            remoteDataSource.getAllUsers().map {users ->
+                Pair(posts, users)
+            }
+
+        }
+        return pair.doOnSuccess {
+            persistentDataSource.clear();
+            persistentDataSource.savePosts(it.first)
+            persistentDataSource.saveUsers(it.second)
         }.ignoreElement()
     }
 }
