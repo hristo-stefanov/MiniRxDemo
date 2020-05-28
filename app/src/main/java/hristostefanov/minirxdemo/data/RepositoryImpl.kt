@@ -6,6 +6,7 @@ import hristostefanov.minirxdemo.business.Repository
 import hristostefanov.minirxdemo.business.User
 import hristostefanov.minirxdemo.persistence.PersistedDataSource
 import hristostefanov.minirxdemo.remote.RemoteDataSource
+import io.reactivex.Completable
 import io.reactivex.Maybe
 import io.reactivex.Observable
 import io.reactivex.Single
@@ -25,13 +26,8 @@ class RepositoryImpl @Inject constructor(
     private val remoteDataSource: RemoteDataSource,
     private val persistentDataSource: PersistedDataSource
 ): Repository {
-    override fun getAllPosts(): Single<List<Post>> {
-        return Observable.concat(
-            persistentDataSource.getAllPosts().filter{ it.isNotEmpty() }.toObservable(),
-            remoteDataSource.getAllPosts().toObservable().doOnNext {
-                persistentDataSource.savePosts(it)
-            }
-        ).firstElement().toSingle()
+    override fun getAllPosts(): Observable<List<Post>> {
+        return persistentDataSource.getAllPosts()
     }
 
     override fun getUserById(userId: Int): Single<User> {
@@ -39,5 +35,11 @@ class RepositoryImpl @Inject constructor(
             remoteDataSource.getUserById(userId).doOnSuccess {
                 persistentDataSource.saveUser(it)
             }.toObservable()).firstElement().toSingle()
+    }
+
+    override fun refresh(): Completable {
+        return remoteDataSource.getAllPosts().doOnSuccess {
+            persistentDataSource.savePosts(it)
+        }.ignoreElement()
     }
 }

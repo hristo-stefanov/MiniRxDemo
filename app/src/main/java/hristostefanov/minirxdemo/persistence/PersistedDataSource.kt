@@ -3,10 +3,11 @@ package hristostefanov.minirxdemo.persistence
 import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.business.User
 import io.reactivex.Maybe
+import io.reactivex.Observable
 import javax.inject.Inject
 
 class PersistedDataSource @Inject constructor(private val database: Database) {
-    fun getAllPosts(): Maybe<List<Post>> {
+    fun getAllPosts(): Observable<List<Post>> {
         return database.postDao().getAll()
             .map { list ->
                 list.map {
