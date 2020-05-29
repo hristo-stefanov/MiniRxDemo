@@ -23,13 +23,13 @@ class PersistedDataSource @Inject constructor(private val database: Database) {
         }
     }
 
-    fun savePosts(posts: List<Post>) {
+    private fun savePosts(posts: List<Post>) {
         database.postDao().insert(posts.map {
             PostEntity(it.id, it.title, it.body, it.userId)
         })
     }
 
-    fun saveUsers(users: List<User>) {
+    private fun saveUsers(users: List<User>) {
         database.userDao().insert(users.map {
             UserEntity(it.id, it.username)
         })
@@ -39,8 +39,13 @@ class PersistedDataSource @Inject constructor(private val database: Database) {
         database.userDao().insert(UserEntity(user.id, user.username))
     }
 
-    fun clear() {
-        database.userDao().deleteAll()
-        database.postDao().deleteAll()
+    fun refreshTx(posts: List<Post>, users: List<User>) {
+        // in Room transactions are synchronous only to guarantee using a single thread
+        database.runInTransaction {
+            database.userDao().deleteAll()
+            database.postDao().deleteAll()
+            savePosts(posts)
+            saveUsers(users)
+        }
     }
 }

@@ -1,9 +1,6 @@
 package hristostefanov.minirxdemo.persistence
 
-import androidx.room.Dao
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
+import androidx.room.*
 import io.reactivex.Maybe
 import io.reactivex.Single
 
@@ -12,10 +9,10 @@ interface UserDAO {
     @Query("SELECT * FROM user WHERE id = :userId")
     fun getUserById(userId: Int): Single<UserEntity>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(userEntity: UserEntity)
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(entities: List<UserEntity>)
 
     @Query("DELETE FROM user")
