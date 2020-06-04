@@ -35,8 +35,6 @@ class MainViewModel @Inject constructor(
     val compositeDisposable = CompositeDisposable()
 
     init {
-        // TODO debounce refresh
-
         // infinite observable
         val refreshTrigger = Observable.concat(Observable.just(Unit), _refreshSubject)
 

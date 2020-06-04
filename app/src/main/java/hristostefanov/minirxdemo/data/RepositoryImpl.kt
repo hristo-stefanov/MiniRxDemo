@@ -24,7 +24,6 @@ class RepositoryImpl @Inject constructor(
     }
 
     override fun refresh(): Completable {
-        // TODO fetch only needed Users
         return remoteDataSource.getAllPosts().flatMap { posts ->
             remoteDataSource.getAllUsers().map { users ->
                 Pair(posts, users)
