@@ -19,6 +19,7 @@ class ListTenFirstPostsInteractor @Inject constructor(private val repository: Re
             }
     }
 
+    // TODO move to separate interactor
     fun refresh(): Completable {
         return repository.refresh()
     }

@@ -43,6 +43,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onStop() {
+        // TODO should #clear it onStop?
         compositeDisposable.dispose()
         super.onStop()
     }
