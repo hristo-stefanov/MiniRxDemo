@@ -5,6 +5,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import com.jakewharton.rxbinding3.view.clicks
 import hristostefanov.minirxdemo.App
 import hristostefanov.minirxdemo.R
@@ -27,10 +28,17 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
 
         refreshButton.clicks().subscribe(viewModel.refreshObserver)
+        swipeRefreshLayout.refreshes().subscribe(viewModel.refreshObserver)
     }
 
     override fun onStart() {
         super.onStart()
+
+        viewModel.progressIndicator.observeOn(AndroidSchedulers.mainThread()).subscribe {
+            swipeRefreshLayout.isRefreshing = it
+        }.also {
+            compositeDisposable.add(it)
+        }
 
         viewModel.errorMessage.observeOn(AndroidSchedulers.mainThread()).subscribe{
             messageTextView.text = it
