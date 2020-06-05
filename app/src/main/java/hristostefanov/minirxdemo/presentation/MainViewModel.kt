@@ -3,6 +3,7 @@ package hristostefanov.minirxdemo.presentation
 import androidx.lifecycle.ViewModel
 import hristostefanov.minirxdemo.R
 import hristostefanov.minirxdemo.business.ListTenFirstPostsInteractor
+import hristostefanov.minirxdemo.business.RefreshInteractor
 import hristostefanov.minirxdemo.util.StringSupplier
 import io.reactivex.Observable
 import io.reactivex.Observer
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 class MainViewModel @Inject constructor(
-    private val listTenFirstPostsInteractor: ListTenFirstPostsInteractor,
+    listTenFirstPostsInteractor: ListTenFirstPostsInteractor,
+    private val refreshInteractor: RefreshInteractor,
     stringSupplier: StringSupplier
 ) :
     ViewModel() {
@@ -39,8 +41,8 @@ class MainViewModel @Inject constructor(
         val refreshTrigger = Observable.concat(Observable.just(Unit), _refreshSubject)
 
         // using concatMap simplifies disposal of chained streams
-        val disposable1 = refreshTrigger.concatMapCompletable {
-            listTenFirstPostsInteractor.refresh()
+        refreshTrigger.concatMapCompletable {
+            refreshInteractor.execute()
                 .subscribeOn(Schedulers.io())
                 .doOnError {
                     val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
@@ -57,16 +59,17 @@ class MainViewModel @Inject constructor(
                 }
                 // prevent disposing the trigger
                 .onErrorComplete()
-        }.subscribe()
-        compositeDisposable.add(disposable1)
+        }.subscribe().also {
+            compositeDisposable.add(it)
+        }
 
 
-        val disposable2 = listTenFirstPostsInteractor.query()
+        listTenFirstPostsInteractor.query()
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {
-                    val postList = it.map { postInfo ->
-                        PostFace(postInfo.title, "@${postInfo.username}")
+                    val postList = it.map { post ->
+                        PostFace(post.title, "@${post.user.username}")
                     }
                     _postList.onNext(postList)
                 }, {
@@ -77,8 +80,9 @@ class MainViewModel @Inject constructor(
                 }, {
                     throw AssertionError("Should not complete")
                 }
-            )
-        compositeDisposable.add(disposable2)
+            ).also {
+                compositeDisposable.add(it)
+            }
     }
 
     override fun onCleared() {

@@ -32,19 +32,24 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        compositeDisposable.add(viewModel.errorMessage.observeOn(AndroidSchedulers.mainThread()).subscribe{
+        viewModel.errorMessage.observeOn(AndroidSchedulers.mainThread()).subscribe{
             messageTextView.text = it
             messageTextView.visibility = if (it.isBlank()) View.GONE else View.VISIBLE
-        })
+        }.also {
+            compositeDisposable.add(it)
+        }
 
-        compositeDisposable.add(viewModel.postList.observeOn(AndroidSchedulers.mainThread()).subscribe {
+        viewModel.postList.observeOn(AndroidSchedulers.mainThread()).subscribe {
             recyclerView.adapter = PostAdapter(it)
-        })
+        }.also {
+            compositeDisposable.add(it)
+        }
     }
 
     override fun onStop() {
-        // TODO should #clear it onStop?
-        compositeDisposable.dispose()
+        // Note: using #clear clear because the container will be reused between start-stop-start
+        // transitions
+        compositeDisposable.clear()
         super.onStop()
     }
 }
