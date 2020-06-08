@@ -15,9 +15,9 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 class MainViewModel @Inject constructor(
-    listTenFirstPostsInteractor: ListTenFirstPostsInteractor,
+    private val listTenFirstPostsInteractor: ListTenFirstPostsInteractor,
     private val refreshInteractor: RefreshInteractor,
-    stringSupplier: StringSupplier
+    private val stringSupplier: StringSupplier
 ) :
     ViewModel() {
 
@@ -36,7 +36,7 @@ class MainViewModel @Inject constructor(
 
     val compositeDisposable = CompositeDisposable()
 
-    init {
+    fun init() {
         // infinite observable
         val refreshTrigger = Observable.concat(Observable.just(Unit), _refreshSubject)
 

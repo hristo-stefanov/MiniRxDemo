@@ -8,17 +8,18 @@ import hristostefanov.minirxdemo.presentation.MainViewModel
 import hristostefanov.minirxdemo.presentation.PostFace
 import hristostefanov.minirxdemo.util.StringSupplier
 import io.reactivex.Completable
+import io.reactivex.CompletableObserver
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.PublishSubject
+import junit.framework.Assert.fail
 import org.junit.Test
 import org.mockito.BDDMockito.*
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
-import java.lang.Thread.sleep
+import java.util.concurrent.TimeUnit
 
-private const val TIMEOUT = 200L
+private const val TIMEOUT_MS = 200L
 
 class MainViewModelTest {
     private val listPostsInteractor = mock(ListTenFirstPostsInteractor::class.java)
@@ -38,7 +39,7 @@ class MainViewModelTest {
         given(listPostsInteractor.query()).willReturn(Observable.just(emptyList()))
         given(refreshInteractor.execute()).willReturn(Completable.complete())
 
-        viewModelUnderTest
+        viewModelUnderTest.init()
 
         then(listPostsInteractor).should().query()
         then(listPostsInteractor).shouldHaveNoMoreInteractions()
@@ -46,43 +47,68 @@ class MainViewModelTest {
         then(refreshInteractor).shouldHaveNoMoreInteractions()
     }
 
-
+    // TODO is this a rule?
     @Test
-    fun `Refresh`() {
-        given(listPostsInteractor.query()).willReturn(Observable.never())
-        given(refreshInteractor.execute()).willReturn(Completable.complete())
-
-        viewModelUnderTest.refreshObserver.onNext(Unit)
-
-        then(refreshInteractor).should(times(2)).execute()
-        then(refreshInteractor).shouldHaveNoMoreInteractions()
-    }
-
-    @Test
-    // Rule: observable properties are infinite
-    fun `First subscription`() {
-        given(listPostsInteractor.query()).willReturn(Observable.never())
-        given(refreshInteractor.execute()).willReturn(Completable.complete())
-
-        val postListObserver = viewModelUnderTest.postList.test()
-        val errorMessageObserver = viewModelUnderTest.errorMessage.test()
-
-        sleep(TIMEOUT) // wait enough for the I/O to assert observers not terminated
-        postListObserver.assertValueCount(1).assertNotTerminated() // emits only the default value
-        errorMessageObserver.assertValueCount(1)
-            .assertNotTerminated() // emits only the default value
-    }
-
-    @Test
-    fun `Subscribe upstream on IO scheduler`() {
+    fun `Subscribe to inputs on IO scheduler`() {
         val observableSpy = Mockito.spy(Observable.never<List<Post>>())
         given(listPostsInteractor.query()).willReturn(observableSpy)
         given(refreshInteractor.execute()).willReturn(Completable.complete())
 
-        viewModelUnderTest
+        viewModelUnderTest.init()
 
         then(observableSpy).should().subscribeOn(Schedulers.io())
     }
+
+    @Test
+    fun `Refresh command`() {
+        given(listPostsInteractor.query()).willReturn(Observable.never())
+        given(refreshInteractor.execute()).willReturn(Completable.complete())
+
+        viewModelUnderTest.init()
+        viewModelUnderTest.refreshObserver.onNext(Unit)
+
+        // TODO check subscribing
+        then(refreshInteractor).should(times(2)).execute()
+        then(refreshInteractor).shouldHaveNoMoreInteractions()
+    }
+
+    /**
+     * Rule: observable output properties are infinite
+     */
+    @Test
+    fun `WHEN postList emits THEN will not complete`() {
+        val listPostsObservable = Observable.concat(Observable.just(listOf(post1)), Observable.never())
+        given(listPostsInteractor.query()).willReturn(listPostsObservable)
+        given(refreshInteractor.execute()).willReturn(Completable.complete())
+
+        val observer = viewModelUnderTest.postList.test()
+        viewModelUnderTest.init()
+
+        // expecting default value + payload
+        observer.awaitCount(2)
+        observer.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.assertNotTerminated()
+    }
+
+    /**
+     * Rule: observable output properties are infinite
+     */
+    @Test
+    fun `WHEN errorMessage emits THEN will not complete`() {
+
+        val refreshCompletable = spy(Completable.error(Throwable("error")))
+        given(listPostsInteractor.query()).willReturn(Observable.never())
+        given(refreshInteractor.execute()).willReturn(refreshCompletable)
+
+        val observer = viewModelUnderTest.errorMessage.test()
+        viewModelUnderTest.init()
+
+        // expecting default value + payload
+        observer.awaitCount(2)
+        observer.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.assertNotTerminated()
+    }
+
 
     /**
      * Rules:
@@ -94,51 +120,61 @@ class MainViewModelTest {
      */
     @Test
     fun `Re-subscribing postList`() {
+        val listPostsObservable = spy(Observable.concat(Observable.just(listOf(post1)), Observable.never()))
+        given(listPostsInteractor.query()).willReturn(listPostsObservable)
         given(refreshInteractor.execute()).willReturn(Completable.complete())
-        val postsSubject = spy(PublishSubject.create<List<Post>>())
-        given(listPostsInteractor.query()).willReturn(postsSubject)
-        val postListObserver1 = viewModelUnderTest.postList.test()
-        postListObserver1.awaitCount(1) // await the default value
-        postsSubject.onNext(listOf(post1)) // emit some post
-        postListObserver1.awaitCount(2) // await the new emission
 
+        val postListObserver1 = viewModelUnderTest.postList.test()
+
+        viewModelUnderTest.init()
+
+        // await the default + new emission, assert the value count cause awaitCount may timeout
+        postListObserver1.awaitCount(2).assertValueCount(2)
         // re-subscribe
         postListObserver1.dispose()
         val postListObserver2 = viewModelUnderTest.postList.test()
 
         postListObserver2
-            .awaitCount(1) // getting only the new emission
+            .awaitCount(1) // getting only the latest emission
             .assertValue(listOf(PostFace(post1.title, "@${post1.user.username}")))
 
         then(listPostsInteractor).should(times(1)).query()
         // .subscribe() is called through a decorator returned by .subscribeOn()
-        then(postsSubject).should(times(1)).subscribe(any<Observer<List<Post>>>())
+        then(listPostsObservable).should(times(1)).subscribe(any<Observer<List<Post>>>())
     }
 
     /**
-     * Rule: should not re-query when resubscribing
-     * Rule: should keep the state when resubscribing
+     * Rules:
+     *
+     * When re-subscribing to an output:
+     * * must re-emit the last value of the output
+     * * must not re-execute the interactor
+     * * must not re-subscribe to the interactor output
      */
     @Test
     fun `Re-subscribing errorMessage`() {
         given(listPostsInteractor.query()).willReturn(Observable.never())
-        val refreshSubject = spy(PublishSubject.create<Unit>())
-        given(refreshInteractor.execute()).willReturn(Completable.fromObservable(refreshSubject))
+        val refreshCompletable = spy(Completable.error(Throwable("error")))
+        given(refreshInteractor.execute()).willReturn(refreshCompletable)
+
         val errorMessageObserver1 = viewModelUnderTest.errorMessage.test()
-        errorMessageObserver1.awaitCount(1) // await the default value
-        refreshSubject.onError(Throwable("error")) // emit some error
-        errorMessageObserver1.awaitCount(2) // await the error message
+
+        viewModelUnderTest.init()
+
+        // await the default + new emission, assert the value count cause awaitCount may timeout
+        errorMessageObserver1.awaitCount(2).assertValueCount(2)
 
         // re-subscribe
         errorMessageObserver1.dispose()
         val errorMessageObserver2 = viewModelUnderTest.errorMessage.test()
 
         errorMessageObserver2
-            .awaitCount(1) // getting only the new emission
+            .awaitCount(1) // getting only the latest emission
             .assertValue("error")
+
         // .subscribe() is called through a decorator returned by .subscribeOn()
         then(refreshInteractor).should(times(1)).execute()
-        then(refreshSubject).should(times(1)).subscribe(any<Observer<Unit>>())
+        then(refreshCompletable).should(times(1)).subscribe(any<CompletableObserver>())
     }
 
 
@@ -147,30 +183,37 @@ class MainViewModelTest {
      */
     @Test
     fun `Listing posts succeeds`() {
+        val listPostsObservable = Observable.concat(Observable.just(listOf(post1)), Observable.never())
+        given(listPostsInteractor.query()).willReturn(listPostsObservable)
         given(refreshInteractor.execute()).willReturn(Completable.complete()) // subscribed to initially
-        val listPostsSubject = PublishSubject.create<List<Post>>()
-        given(listPostsInteractor.query()).willReturn(listPostsSubject)
+
+
         val postListObserver = viewModelUnderTest.postList.test()
-        postListObserver.awaitCount(1) // await the default value
+        viewModelUnderTest.init()
 
-        listPostsSubject.onNext(listOf(post1))
-
+        // expecting the default value + payload
         postListObserver.awaitCount(2).assertValueAt(1, listOf(PostFace("Title", "@username")))
     }
 
+    /**
+     *  Rule: map [Throwable] to [String]
+     */
     @Test
-            /**
-             *  Rule: map [Throwable] to [String]
-             */
     fun `Refreshing fails`() {
+        val refreshCompletable = Completable.error(Throwable("error"))
+        given(refreshInteractor.execute()).willReturn(refreshCompletable)
         given(listPostsInteractor.query()).willReturn(Observable.never()) // it's an infinite observable
-        val refreshSubject = PublishSubject.create<Unit>()
-        given(refreshInteractor.execute()).willReturn(Completable.fromObservable(refreshSubject))
+
         val errorMessageObserver = viewModelUnderTest.errorMessage.test()
-        errorMessageObserver.awaitCount(1) // await the default value
+        viewModelUnderTest.init()
 
-        refreshSubject.onError(Throwable("error details"))
+        // expecting the default value + payload
+        errorMessageObserver.awaitCount(2).assertValueAt(1, "error")
+    }
 
-        errorMessageObserver.awaitCount(2).assertValueAt(1, "error details")
+    @Test
+    fun `Refreshing succeeds`() {
+        // TODO implement
+        fail()
     }
 }
