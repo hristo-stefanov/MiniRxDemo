@@ -10,7 +10,7 @@ class ViewModelFactory @Inject constructor(private val applicationComponent: App
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel?> create(modelClass: Class<T>): T =
         when(modelClass) {
-            MainViewModel::class.java -> applicationComponent.getMainViewModel() as T
+            MainViewModel::class.java -> applicationComponent.getMainViewModel().apply { init() } as T
             else -> throw IllegalArgumentException()
         }
 }

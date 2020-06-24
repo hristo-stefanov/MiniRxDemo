@@ -4,5 +4,5 @@ data class Post(
     val id: Int,
     val title: String,
     val body: String,
-    val user: User
+    val userId: Int
 )

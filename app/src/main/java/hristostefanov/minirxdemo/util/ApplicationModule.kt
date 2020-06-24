@@ -7,9 +7,11 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import hristostefanov.minirxdemo.BuildConfig
-import hristostefanov.minirxdemo.business.Repository
-import hristostefanov.minirxdemo.data.RepositoryImpl
+import hristostefanov.minirxdemo.business.PostGateway
+import hristostefanov.minirxdemo.business.UserGateway
 import hristostefanov.minirxdemo.persistence.Database
+import hristostefanov.minirxdemo.persistence.PostGatewayImpl
+import hristostefanov.minirxdemo.persistence.UserGatewayImpl
 import hristostefanov.minirxdemo.remote.Service
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -17,9 +19,11 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 @Module
 abstract class ApplicationModule {
+    @Binds
+    abstract fun bindPostGateway(postGateway: PostGatewayImpl): PostGateway
 
     @Binds
-    abstract fun bindRepository(repositoryImpl: RepositoryImpl): Repository
+    abstract fun bindUserGateway(userGateway: UserGatewayImpl): UserGateway
 
     companion object {
         @ApplicationScope

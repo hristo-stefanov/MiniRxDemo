@@ -68,10 +68,7 @@ class MainViewModel @Inject constructor(
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {
-                    val postList = it.map { post ->
-                        PostFace(post.title, "@${post.user.username}")
-                    }
-                    _postList.onNext(postList)
+                    _postList.onNext(it)
                 }, {
                     // this is an observable query which returns infinite stream so it is not supposed
                     // to emit terminal events like error, but we handle it because it could be some
