@@ -1,4 +1,5 @@
 package hristostefanov.minirxdemo
+/*
 
 import hristostefanov.minirxdemo.remote.PostDTO
 import hristostefanov.minirxdemo.remote.RemoteDataSource
@@ -45,4 +46,4 @@ class RemoteDataSourceTest {
         then(service).shouldHaveNoMoreInteractions()
         assertThat((observer.values()[0].username), equalTo("username"))
     }
-}
+}*/
