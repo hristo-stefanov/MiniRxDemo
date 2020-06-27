@@ -1,6 +1,6 @@
 package hristostefanov.minirxdemo
 
-import hristostefanov.minirxdemo.business.ListTenFirstPostsInteractor
+import hristostefanov.minirxdemo.business.interactors.ListTenFirstPostsInteractor
 import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.business.Repository
 import hristostefanov.minirxdemo.business.User
@@ -24,7 +24,10 @@ class ListTenFirstPostsInteractorTest {
         }
 
         given(repository.getAllPosts()).willReturn(Observable.just(posts))
-        val interactorUnderTest = ListTenFirstPostsInteractor(repository)
+        val interactorUnderTest =
+            ListTenFirstPostsInteractor(
+                repository
+            )
 
         val observer = interactorUnderTest.query().test()
 

@@ -3,7 +3,7 @@ package hristostefanov.minirxdemo.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import hristostefanov.minirxdemo.presentation.MainViewModel
-import hristostefanov.minirxdemo.util.ApplicationComponent
+import hristostefanov.minirxdemo.utilities.di.ApplicationComponent
 import javax.inject.Inject
 
 class ViewModelFactory @Inject constructor(private val applicationComponent: ApplicationComponent): ViewModelProvider.Factory {

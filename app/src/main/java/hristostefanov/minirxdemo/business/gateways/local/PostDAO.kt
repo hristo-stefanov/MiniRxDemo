@@ -1,6 +1,7 @@
-package hristostefanov.minirxdemo.persistence
+package hristostefanov.minirxdemo.business.gateways.local
 
 import androidx.room.*
+import hristostefanov.minirxdemo.business.entities.PostEntity
 import io.reactivex.Observable
 
 @Dao

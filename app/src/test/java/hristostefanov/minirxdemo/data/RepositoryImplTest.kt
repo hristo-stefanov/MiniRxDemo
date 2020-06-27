@@ -1,9 +1,8 @@
 package hristostefanov.minirxdemo.data
 
-import hristostefanov.minirxdemo.any
 import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.persistence.PersistedDataSource
-import hristostefanov.minirxdemo.remote.Service
+import hristostefanov.minirxdemo.business.gateways.remote.Service
 import io.reactivex.*
 import org.junit.Test
 import org.mockito.BDDMockito.*

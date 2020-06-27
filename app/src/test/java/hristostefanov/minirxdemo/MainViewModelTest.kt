@@ -1,12 +1,12 @@
 package hristostefanov.minirxdemo
 
-import hristostefanov.minirxdemo.business.ListTenFirstPostsInteractor
+import hristostefanov.minirxdemo.business.interactors.ListTenFirstPostsInteractor
 import hristostefanov.minirxdemo.business.Post
-import hristostefanov.minirxdemo.business.RefreshInteractor
+import hristostefanov.minirxdemo.business.interactors.RefreshInteractor
 import hristostefanov.minirxdemo.business.User
 import hristostefanov.minirxdemo.presentation.MainViewModel
-import hristostefanov.minirxdemo.business.PostFace
-import hristostefanov.minirxdemo.util.StringSupplier
+import hristostefanov.minirxdemo.business.interactors.PostFace
+import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Completable
 import io.reactivex.CompletableObserver
 import io.reactivex.Observable

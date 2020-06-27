@@ -1,4 +1,4 @@
-package hristostefanov.minirxdemo.business
+package hristostefanov.minirxdemo.business.interactors
 
 data class PostFace(
     val title: String,

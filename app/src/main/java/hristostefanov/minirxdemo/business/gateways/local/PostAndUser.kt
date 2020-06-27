@@ -1,7 +1,9 @@
-package hristostefanov.minirxdemo.persistence
+package hristostefanov.minirxdemo.business.gateways.local
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import hristostefanov.minirxdemo.business.entities.PostEntity
+import hristostefanov.minirxdemo.business.entities.UserEntity
 
 data class PostAndUser(
     @Embedded

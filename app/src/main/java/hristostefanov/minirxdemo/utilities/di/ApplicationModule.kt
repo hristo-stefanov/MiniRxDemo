@@ -1,14 +1,15 @@
-package hristostefanov.minirxdemo.util
+package hristostefanov.minirxdemo.utilities.di
 
 import android.app.Application
 import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import hristostefanov.minirxdemo.BuildConfig
-import hristostefanov.minirxdemo.persistence.Database
-import hristostefanov.minirxdemo.persistence.PostDAO
-import hristostefanov.minirxdemo.persistence.UserDAO
-import hristostefanov.minirxdemo.remote.Service
+import hristostefanov.minirxdemo.utilities.db.Database
+import hristostefanov.minirxdemo.business.gateways.local.PostDAO
+import hristostefanov.minirxdemo.business.gateways.local.UserDAO
+import hristostefanov.minirxdemo.business.gateways.remote.Service
+import hristostefanov.minirxdemo.utilities.StringSupplier
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory

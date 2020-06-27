@@ -1,6 +1,6 @@
-package hristostefanov.minirxdemo.business
+package hristostefanov.minirxdemo.business.interactors
 
-import hristostefanov.minirxdemo.persistence.PostDAO
+import hristostefanov.minirxdemo.business.gateways.local.PostDAO
 import io.reactivex.Observable
 import javax.inject.Inject
 

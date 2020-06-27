@@ -1,4 +1,4 @@
-package hristostefanov.minirxdemo.remote
+package hristostefanov.minirxdemo.business.gateways.remote
 
 import com.google.gson.annotations.SerializedName
 // TODO this does not look like using the DTD pattern at all, call it Remote, external or without any suffix

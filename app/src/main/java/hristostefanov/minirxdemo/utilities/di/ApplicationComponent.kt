@@ -1,4 +1,4 @@
-package hristostefanov.minirxdemo.util
+package hristostefanov.minirxdemo.utilities.di
 
 import android.app.Application
 import dagger.BindsInstance

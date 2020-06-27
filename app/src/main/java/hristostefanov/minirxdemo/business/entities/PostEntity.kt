@@ -1,4 +1,4 @@
-package hristostefanov.minirxdemo.persistence
+package hristostefanov.minirxdemo.business.entities
 
 import androidx.room.*
 import androidx.room.ForeignKey.CASCADE

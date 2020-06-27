@@ -1,9 +1,13 @@
-package hristostefanov.minirxdemo.business
+package hristostefanov.minirxdemo.business.interactors
 
-import hristostefanov.minirxdemo.persistence.*
-import hristostefanov.minirxdemo.remote.PostDTO
-import hristostefanov.minirxdemo.remote.Service
-import hristostefanov.minirxdemo.remote.UserDTO
+import hristostefanov.minirxdemo.business.gateways.local.PostDAO
+import hristostefanov.minirxdemo.business.gateways.local.UserDAO
+import hristostefanov.minirxdemo.business.entities.PostEntity
+import hristostefanov.minirxdemo.business.entities.UserEntity
+import hristostefanov.minirxdemo.business.gateways.remote.PostDTO
+import hristostefanov.minirxdemo.business.gateways.remote.Service
+import hristostefanov.minirxdemo.business.gateways.remote.UserDTO
+import hristostefanov.minirxdemo.utilities.db.Database
 import io.reactivex.Completable
 import javax.inject.Inject
 
@@ -35,7 +39,12 @@ class RefreshInteractor @Inject constructor(
                 UserEntity(it.id, it.username)
             })
             postGateway.insert(first.map {
-                PostEntity(it.id, it.title, it.body, it.userId)
+                PostEntity(
+                    it.id,
+                    it.title,
+                    it.body,
+                    it.userId
+                )
             })
         }
     }

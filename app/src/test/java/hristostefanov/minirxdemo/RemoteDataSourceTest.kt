@@ -1,10 +1,10 @@
 package hristostefanov.minirxdemo
 /*
 
-import hristostefanov.minirxdemo.remote.PostDTO
-import hristostefanov.minirxdemo.remote.RemoteDataSource
-import hristostefanov.minirxdemo.remote.Service
-import hristostefanov.minirxdemo.remote.UserDTO
+import hristostefanov.minirxdemo.business.remote.PostDTO
+import hristostefanov.minirxdemo.business.remote.RemoteDataSource
+import hristostefanov.minirxdemo.business.remote.Service
+import hristostefanov.minirxdemo.business.remote.UserDTO
 import io.reactivex.Single
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Assert.assertThat

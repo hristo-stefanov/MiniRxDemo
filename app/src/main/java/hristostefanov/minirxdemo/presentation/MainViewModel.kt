@@ -2,10 +2,10 @@ package hristostefanov.minirxdemo.presentation
 
 import androidx.lifecycle.ViewModel
 import hristostefanov.minirxdemo.R
-import hristostefanov.minirxdemo.business.ListTenFirstPostsInteractor
-import hristostefanov.minirxdemo.business.PostFace
-import hristostefanov.minirxdemo.business.RefreshInteractor
-import hristostefanov.minirxdemo.util.StringSupplier
+import hristostefanov.minirxdemo.business.interactors.ListTenFirstPostsInteractor
+import hristostefanov.minirxdemo.business.interactors.PostFace
+import hristostefanov.minirxdemo.business.interactors.RefreshInteractor
+import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.CompositeDisposable

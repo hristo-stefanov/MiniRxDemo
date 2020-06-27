@@ -1,4 +1,4 @@
-package hristostefanov.minirxdemo.remote
+package hristostefanov.minirxdemo.business.gateways.remote
 
 import com.google.gson.annotations.SerializedName
 
