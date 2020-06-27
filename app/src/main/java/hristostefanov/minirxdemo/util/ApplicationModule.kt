@@ -1,17 +1,13 @@
 package hristostefanov.minirxdemo.util
 
 import android.app.Application
-import android.content.Context
 import androidx.room.Room
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import hristostefanov.minirxdemo.BuildConfig
-import hristostefanov.minirxdemo.business.PostGateway
-import hristostefanov.minirxdemo.business.UserGateway
 import hristostefanov.minirxdemo.persistence.Database
-import hristostefanov.minirxdemo.persistence.PostGatewayImpl
-import hristostefanov.minirxdemo.persistence.UserGatewayImpl
+import hristostefanov.minirxdemo.persistence.PostDAO
+import hristostefanov.minirxdemo.persistence.UserDAO
 import hristostefanov.minirxdemo.remote.Service
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -19,13 +15,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 @Module
 abstract class ApplicationModule {
-    @Binds
-    abstract fun bindPostGateway(postGateway: PostGatewayImpl): PostGateway
-
-    @Binds
-    abstract fun bindUserGateway(userGateway: UserGatewayImpl): UserGateway
-
     companion object {
+
+        @Provides
+        fun providePostGateway(db: Database): PostDAO = db.postDao()
+
+        @Provides
+        fun provideUserGateway(db: Database): UserDAO = db.userDao()
+
         @ApplicationScope
         @Provides
         fun provideDatabase(app: Application): Database {

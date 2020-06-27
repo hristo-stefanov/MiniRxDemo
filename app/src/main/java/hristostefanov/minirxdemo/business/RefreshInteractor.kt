@@ -1,6 +1,6 @@
 package hristostefanov.minirxdemo.business
 
-import hristostefanov.minirxdemo.persistence.Database
+import hristostefanov.minirxdemo.persistence.*
 import hristostefanov.minirxdemo.remote.PostDTO
 import hristostefanov.minirxdemo.remote.Service
 import hristostefanov.minirxdemo.remote.UserDTO
@@ -8,10 +8,10 @@ import io.reactivex.Completable
 import javax.inject.Inject
 
 class RefreshInteractor @Inject constructor(
-    // TODO depending on external service, make a gateway?
+    // TODO depending on external service, make a gateway with special error handling??
     private val service: Service,
-    private val userGateway: UserGateway,
-    private val postGateway: PostGateway,
+    private val userGateway: UserDAO,
+    private val postGateway: PostDAO,
     private val database: Database
 ) {
     fun execute(): Completable {
@@ -32,10 +32,10 @@ class RefreshInteractor @Inject constructor(
             userGateway.deleteAll()
             postGateway.deleteAll()
             userGateway.insert(second.map {
-                User(it.id, it.username)
+                UserEntity(it.id, it.username)
             })
-            postGateway.insertAll(first.map {
-                Post(it.id, it.title, it.body, it.userId)
+            postGateway.insert(first.map {
+                PostEntity(it.id, it.title, it.body, it.userId)
             })
         }
     }

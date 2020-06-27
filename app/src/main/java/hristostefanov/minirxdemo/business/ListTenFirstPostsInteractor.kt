@@ -1,15 +1,22 @@
 package hristostefanov.minirxdemo.business
 
-import hristostefanov.minirxdemo.presentation.PostFace
+import hristostefanov.minirxdemo.persistence.PostDAO
 import io.reactivex.Observable
 import javax.inject.Inject
 
 private const val MAX_POST_COUNT = 10
 
-class ListTenFirstPostsInteractor @Inject constructor(private val postGateway: PostGateway) {
+class ListTenFirstPostsInteractor @Inject constructor(private val postGateway: PostDAO) {
     fun query(): Observable<List<PostFace>> {
-        return postGateway.observeQueryAllPosts().map { list ->
-            list.take(MAX_POST_COUNT)
+        return postGateway.getPostAndUser().map { list ->
+            list
+                .take(MAX_POST_COUNT)
+                .map {
+                    PostFace(
+                        it.post.title,
+                        "@${it.user.username}"
+                    )
+                }
         }
     }
 }

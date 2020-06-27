@@ -5,7 +5,7 @@ import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.business.RefreshInteractor
 import hristostefanov.minirxdemo.business.User
 import hristostefanov.minirxdemo.presentation.MainViewModel
-import hristostefanov.minirxdemo.presentation.PostFace
+import hristostefanov.minirxdemo.business.PostFace
 import hristostefanov.minirxdemo.util.StringSupplier
 import io.reactivex.Completable
 import io.reactivex.CompletableObserver
@@ -136,7 +136,12 @@ class MainViewModelTest {
 
         postListObserver2
             .awaitCount(1) // getting only the latest emission
-            .assertValue(listOf(PostFace(post1.title, "@${post1.user.username}")))
+            .assertValue(listOf(
+                PostFace(
+                    post1.title,
+                    "@${post1.user.username}"
+                )
+            ))
 
         then(listPostsInteractor).should(times(1)).query()
         // .subscribe() is called through a decorator returned by .subscribeOn()
@@ -192,7 +197,12 @@ class MainViewModelTest {
         viewModelUnderTest.init()
 
         // expecting the default value + payload
-        postListObserver.awaitCount(2).assertValueAt(1, listOf(PostFace("Title", "@username")))
+        postListObserver.awaitCount(2).assertValueAt(1, listOf(
+            PostFace(
+                "Title",
+                "@username"
+            )
+        ))
     }
 
     /**

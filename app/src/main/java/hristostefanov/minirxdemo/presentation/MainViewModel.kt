@@ -3,6 +3,7 @@ package hristostefanov.minirxdemo.presentation
 import androidx.lifecycle.ViewModel
 import hristostefanov.minirxdemo.R
 import hristostefanov.minirxdemo.business.ListTenFirstPostsInteractor
+import hristostefanov.minirxdemo.business.PostFace
 import hristostefanov.minirxdemo.business.RefreshInteractor
 import hristostefanov.minirxdemo.util.StringSupplier
 import io.reactivex.Observable

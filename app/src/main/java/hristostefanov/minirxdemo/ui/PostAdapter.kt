@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import hristostefanov.minirxdemo.R
-import hristostefanov.minirxdemo.presentation.PostFace
+import hristostefanov.minirxdemo.business.PostFace
 import kotlinx.android.synthetic.main.post_list_item.view.*
 
 class PostAdapter(private val list: List<PostFace>): RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
