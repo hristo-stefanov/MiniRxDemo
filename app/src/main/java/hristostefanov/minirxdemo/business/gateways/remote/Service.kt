@@ -6,11 +6,11 @@ import retrofit2.http.Path
 
 interface Service {
     @GET("/posts")
-    fun getAllPosts(): Single<List<PostDTO>>
+    fun getAllPosts(): Single<List<PostResource>>
 
     @GET("/users")
-    fun getAllUsers(): Single<List<UserDTO>>
+    fun getAllUsers(): Single<List<UserResource>>
 
     @GET("/users/{id}")
-    fun getUserById(@Path("id") userId: Int): Single<UserDTO>
+    fun getUserById(@Path("id") userId: Int): Single<UserResource>
 }

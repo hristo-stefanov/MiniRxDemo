@@ -4,9 +4,9 @@ import hristostefanov.minirxdemo.business.entities.PostEntity
 import hristostefanov.minirxdemo.business.entities.UserEntity
 import hristostefanov.minirxdemo.business.gateways.local.PostDAO
 import hristostefanov.minirxdemo.business.gateways.local.UserDAO
-import hristostefanov.minirxdemo.business.gateways.remote.PostDTO
+import hristostefanov.minirxdemo.business.gateways.remote.PostResource
 import hristostefanov.minirxdemo.business.gateways.remote.Service
-import hristostefanov.minirxdemo.business.gateways.remote.UserDTO
+import hristostefanov.minirxdemo.business.gateways.remote.UserResource
 import io.reactivex.Completable
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -31,7 +31,7 @@ class Commands @Inject constructor(
         }
     }
 
-    private fun refreshInTx(first: List<PostDTO>, second: List<UserDTO>) {
+    private fun refreshInTx(first: List<PostResource>, second: List<UserResource>) {
         transactionExecutor.execute {
             userDAO.deleteAll()
             postDAO.deleteAll()
