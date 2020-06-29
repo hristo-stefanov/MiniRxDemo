@@ -2,9 +2,9 @@ package hristostefanov.minirxdemo.presentation
 
 import androidx.lifecycle.ViewModel
 import hristostefanov.minirxdemo.R
-import hristostefanov.minirxdemo.business.interactors.ListTenFirstPostsInteractor
+import hristostefanov.minirxdemo.business.interactors.Queries
 import hristostefanov.minirxdemo.business.interactors.PostFace
-import hristostefanov.minirxdemo.business.interactors.RefreshInteractor
+import hristostefanov.minirxdemo.business.interactors.Commands
 import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Observable
 import io.reactivex.Observer
@@ -16,8 +16,8 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 class MainViewModel @Inject constructor(
-    private val listTenFirstPostsInteractor: ListTenFirstPostsInteractor,
-    private val refreshInteractor: RefreshInteractor,
+    private val queries: Queries,
+    private val commands: Commands,
     private val stringSupplier: StringSupplier
 ) :
     ViewModel() {
@@ -43,7 +43,7 @@ class MainViewModel @Inject constructor(
 
         // using concatMap simplifies disposal of chained streams
         refreshTrigger.concatMapCompletable {
-            refreshInteractor.execute()
+            commands.refresh
                 .subscribeOn(Schedulers.io())
                 .doOnError {
                     val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
@@ -65,7 +65,7 @@ class MainViewModel @Inject constructor(
         }
 
 
-        listTenFirstPostsInteractor.query()
+        queries.listTenFirstPosts
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {

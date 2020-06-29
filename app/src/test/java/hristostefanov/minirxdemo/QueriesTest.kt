@@ -1,6 +1,6 @@
 package hristostefanov.minirxdemo
 
-import hristostefanov.minirxdemo.business.interactors.ListTenFirstPostsInteractor
+import hristostefanov.minirxdemo.business.interactors.Queries
 import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.business.Repository
 import hristostefanov.minirxdemo.business.User
@@ -12,7 +12,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
 
 
-class ListTenFirstPostsInteractorTest {
+class QueriesTest {
 
     private val repository = mock(Repository::class.java)
 
@@ -25,11 +25,11 @@ class ListTenFirstPostsInteractorTest {
 
         given(repository.getAllPosts()).willReturn(Observable.just(posts))
         val interactorUnderTest =
-            ListTenFirstPostsInteractor(
+            Queries(
                 repository
             )
 
-        val observer = interactorUnderTest.query().test()
+        val observer = interactorUnderTest.listTenFirstPosts().test()
 
         val result = observer.values()[0]
         assertThat(result.size, equalTo(10))

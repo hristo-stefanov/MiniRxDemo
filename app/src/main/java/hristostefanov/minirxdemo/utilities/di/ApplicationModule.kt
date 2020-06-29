@@ -13,16 +13,24 @@ import hristostefanov.minirxdemo.utilities.StringSupplier
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.Executor
+import javax.inject.Named
 
 @Module
 abstract class ApplicationModule {
     companion object {
 
         @Provides
-        fun providePostGateway(db: Database): PostDAO = db.postDao()
+        fun providePostDAO(db: Database): PostDAO = db.postDao()
 
         @Provides
-        fun provideUserGateway(db: Database): UserDAO = db.userDao()
+        fun provideUserDAO(db: Database): UserDAO = db.userDao()
+
+
+        @Provides @Named("transactionExecutor")
+        fun transactionExecutor(db: Database): Executor = Executor { command ->
+            db.runInTransaction(command)
+        }
 
         @ApplicationScope
         @Provides

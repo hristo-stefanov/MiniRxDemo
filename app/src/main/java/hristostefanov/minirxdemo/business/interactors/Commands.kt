@@ -1,25 +1,26 @@
 package hristostefanov.minirxdemo.business.interactors
 
-import hristostefanov.minirxdemo.business.gateways.local.PostDAO
-import hristostefanov.minirxdemo.business.gateways.local.UserDAO
 import hristostefanov.minirxdemo.business.entities.PostEntity
 import hristostefanov.minirxdemo.business.entities.UserEntity
+import hristostefanov.minirxdemo.business.gateways.local.PostDAO
+import hristostefanov.minirxdemo.business.gateways.local.UserDAO
 import hristostefanov.minirxdemo.business.gateways.remote.PostDTO
 import hristostefanov.minirxdemo.business.gateways.remote.Service
 import hristostefanov.minirxdemo.business.gateways.remote.UserDTO
-import hristostefanov.minirxdemo.utilities.db.Database
 import io.reactivex.Completable
+import java.util.concurrent.Executor
 import javax.inject.Inject
+import javax.inject.Named
 
-class RefreshInteractor @Inject constructor(
-    // TODO depending on external service, make a gateway with special error handling??
+class Commands @Inject constructor(
     private val service: Service,
-    private val userGateway: UserDAO,
-    private val postGateway: PostDAO,
-    private val database: Database
+    private val userDAO: UserDAO,
+    private val postDAO: PostDAO,
+    @Named("transactionExecutor")
+    private val transactionExecutor: Executor
 ) {
-    fun execute(): Completable {
-        return service.getAllPosts().flatMap { posts ->
+    val refresh: Completable by lazy {
+        service.getAllPosts().flatMap { posts ->
             service.getAllUsers().map { users ->
                 Pair(posts, users)
             }
@@ -31,14 +32,13 @@ class RefreshInteractor @Inject constructor(
     }
 
     private fun refreshInTx(first: List<PostDTO>, second: List<UserDTO>) {
-        // TODO: abstract running transaction without depending on the database
-        database.runInTransaction {
-            userGateway.deleteAll()
-            postGateway.deleteAll()
-            userGateway.insert(second.map {
+        transactionExecutor.execute {
+            userDAO.deleteAll()
+            postDAO.deleteAll()
+            userDAO.insert(second.map {
                 UserEntity(it.id, it.username)
             })
-            postGateway.insert(first.map {
+            postDAO.insert(first.map {
                 PostEntity(
                     it.id,
                     it.title,
@@ -48,5 +48,4 @@ class RefreshInteractor @Inject constructor(
             })
         }
     }
-
 }

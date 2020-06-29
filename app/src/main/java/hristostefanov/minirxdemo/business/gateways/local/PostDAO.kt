@@ -14,5 +14,5 @@ interface PostDAO {
 
     @Query("SELECT * FROM post")
     @Transaction
-    fun getPostAndUser(): Observable<List<PostAndUser>>
+    fun getPostAndUserInTx(): Observable<List<PostAndUser>>
 }
