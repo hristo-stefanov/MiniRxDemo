@@ -8,7 +8,7 @@ import androidx.room.ForeignKey.CASCADE
     // for referential integrity, generates a a FOREIGN KEY constraint
     foreignKeys = [
         ForeignKey(
-            childColumns = ["userId"], entity = UserEntity::class, parentColumns = ["id"],
+            childColumns = ["userId"], entity = User::class, parentColumns = ["id"],
             deferred = true,
             onDelete = CASCADE, onUpdate = CASCADE
         )
@@ -16,7 +16,7 @@ import androidx.room.ForeignKey.CASCADE
     // for faster check of referential integrity
     indices = [Index("userId")]
 )
-data class PostEntity(
+data class Post(
     @PrimaryKey
     val id: Int,
     val title: String,

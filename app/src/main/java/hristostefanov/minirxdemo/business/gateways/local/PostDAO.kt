@@ -1,13 +1,13 @@
 package hristostefanov.minirxdemo.business.gateways.local
 
 import androidx.room.*
-import hristostefanov.minirxdemo.business.entities.PostEntity
+import hristostefanov.minirxdemo.business.entities.Post
 import io.reactivex.Observable
 
 @Dao
 interface PostDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(list: List<PostEntity>)
+    fun insert(list: List<Post>)
 
     @Query("DELETE FROM post")
     fun deleteAll()

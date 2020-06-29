@@ -1,7 +1,7 @@
 package hristostefanov.minirxdemo.business.interactors
 
-import hristostefanov.minirxdemo.business.entities.PostEntity
-import hristostefanov.minirxdemo.business.entities.UserEntity
+import hristostefanov.minirxdemo.business.entities.Post
+import hristostefanov.minirxdemo.business.entities.User
 import hristostefanov.minirxdemo.business.gateways.local.PostDAO
 import hristostefanov.minirxdemo.business.gateways.local.UserDAO
 import hristostefanov.minirxdemo.business.gateways.remote.PostResource
@@ -36,10 +36,10 @@ class Commands @Inject constructor(
             userDAO.deleteAll()
             postDAO.deleteAll()
             userDAO.insert(second.map {
-                UserEntity(it.id, it.username)
+                User(it.id, it.username)
             })
             postDAO.insert(first.map {
-                PostEntity(
+                Post(
                     it.id,
                     it.title,
                     it.body,
