@@ -12,14 +12,14 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
 
-class Commands @Inject constructor(
+class RefreshLocalDataFromRemoteService @Inject constructor(
     private val service: Service,
     private val userDAO: UserDAO,
     private val postDAO: PostDAO,
     @Named("transactionExecutor")
     private val transactionExecutor: Executor
 ) {
-    val refresh: Completable by lazy {
+    val execution: Completable by lazy {
         service.getAllPosts().flatMap { posts ->
             service.getAllUsers().map { users ->
                 Pair(posts, users)

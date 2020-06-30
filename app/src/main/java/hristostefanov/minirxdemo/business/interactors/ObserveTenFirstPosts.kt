@@ -6,8 +6,8 @@ import javax.inject.Inject
 
 private const val MAX_POST_COUNT = 10
 
-class Queries @Inject constructor(private val postDAO: PostDAO) {
-    val listTenFirstPosts: Observable<List<PostFace>> by lazy {
+class ObserveTenFirstPosts @Inject constructor(private val postDAO: PostDAO) {
+    val source: Observable<List<PostFace>> by lazy {
         postDAO.getPostAndUserInTx().map { list ->
             list
                 .take(MAX_POST_COUNT)
@@ -20,3 +20,8 @@ class Queries @Inject constructor(private val postDAO: PostDAO) {
         }
     }
 }
+
+data class PostFace(
+    val title: String,
+    val username: String
+)

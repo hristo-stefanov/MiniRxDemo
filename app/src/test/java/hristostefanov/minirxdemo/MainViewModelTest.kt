@@ -1,8 +1,8 @@
 package hristostefanov.minirxdemo
 
-import hristostefanov.minirxdemo.business.interactors.Queries
+import hristostefanov.minirxdemo.business.interactors.ObserveTenFirstPosts
 import hristostefanov.minirxdemo.business.Post
-import hristostefanov.minirxdemo.business.interactors.Commands
+import hristostefanov.minirxdemo.business.interactors.RefreshLocalDataFromRemoteService
 import hristostefanov.minirxdemo.business.User
 import hristostefanov.minirxdemo.presentation.MainViewModel
 import hristostefanov.minirxdemo.business.interactors.PostFace
@@ -22,8 +22,8 @@ import java.util.concurrent.TimeUnit
 private const val TIMEOUT_MS = 200L
 
 class MainViewModelTest {
-    private val listPostsInteractor = mock(Queries::class.java)
-    private val refreshInteractor = mock(Commands::class.java)
+    private val listPostsInteractor = mock(ObserveTenFirstPosts::class.java)
+    private val refreshInteractor = mock(RefreshLocalDataFromRemoteService::class.java)
     private val stringSupplier = object : StringSupplier {
         override fun get(resId: Int): String = "Unknown error"
     }
@@ -36,14 +36,14 @@ class MainViewModelTest {
 
     @Test
     fun `Create`() {
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(Observable.just(emptyList()))
-        given(refreshInteractor.refresh()).willReturn(Completable.complete())
+        given(listPostsInteractor.source()).willReturn(Observable.just(emptyList()))
+        given(refreshInteractor.execution()).willReturn(Completable.complete())
 
         viewModelUnderTest.init()
 
-        then(listPostsInteractor).should().listTenFirstPosts()
+        then(listPostsInteractor).should().source()
         then(listPostsInteractor).shouldHaveNoMoreInteractions()
-        then(refreshInteractor).should().refresh()
+        then(refreshInteractor).should().execution()
         then(refreshInteractor).shouldHaveNoMoreInteractions()
     }
 
@@ -51,8 +51,8 @@ class MainViewModelTest {
     @Test
     fun `Subscribe to inputs on IO scheduler`() {
         val observableSpy = Mockito.spy(Observable.never<List<Post>>())
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(observableSpy)
-        given(refreshInteractor.refresh()).willReturn(Completable.complete())
+        given(listPostsInteractor.source()).willReturn(observableSpy)
+        given(refreshInteractor.execution()).willReturn(Completable.complete())
 
         viewModelUnderTest.init()
 
@@ -61,14 +61,14 @@ class MainViewModelTest {
 
     @Test
     fun `Refresh command`() {
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(Observable.never())
-        given(refreshInteractor.refresh()).willReturn(Completable.complete())
+        given(listPostsInteractor.source()).willReturn(Observable.never())
+        given(refreshInteractor.execution()).willReturn(Completable.complete())
 
         viewModelUnderTest.init()
         viewModelUnderTest.refreshObserver.onNext(Unit)
 
         // TODO check subscribing
-        then(refreshInteractor).should(times(2)).refresh()
+        then(refreshInteractor).should(times(2)).execution()
         then(refreshInteractor).shouldHaveNoMoreInteractions()
     }
 
@@ -78,8 +78,8 @@ class MainViewModelTest {
     @Test
     fun `WHEN postList emits THEN will not complete`() {
         val listPostsObservable = Observable.concat(Observable.just(listOf(post1)), Observable.never())
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(listPostsObservable)
-        given(refreshInteractor.refresh()).willReturn(Completable.complete())
+        given(listPostsInteractor.source()).willReturn(listPostsObservable)
+        given(refreshInteractor.execution()).willReturn(Completable.complete())
 
         val observer = viewModelUnderTest.postList.test()
         viewModelUnderTest.init()
@@ -97,8 +97,8 @@ class MainViewModelTest {
     fun `WHEN errorMessage emits THEN will not complete`() {
 
         val refreshCompletable = spy(Completable.error(Throwable("error")))
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(Observable.never())
-        given(refreshInteractor.refresh()).willReturn(refreshCompletable)
+        given(listPostsInteractor.source()).willReturn(Observable.never())
+        given(refreshInteractor.execution()).willReturn(refreshCompletable)
 
         val observer = viewModelUnderTest.errorMessage.test()
         viewModelUnderTest.init()
@@ -121,8 +121,8 @@ class MainViewModelTest {
     @Test
     fun `Re-subscribing postList`() {
         val listPostsObservable = spy(Observable.concat(Observable.just(listOf(post1)), Observable.never()))
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(listPostsObservable)
-        given(refreshInteractor.refresh()).willReturn(Completable.complete())
+        given(listPostsInteractor.source()).willReturn(listPostsObservable)
+        given(refreshInteractor.execution()).willReturn(Completable.complete())
 
         val postListObserver1 = viewModelUnderTest.postList.test()
 
@@ -143,7 +143,7 @@ class MainViewModelTest {
                 )
             ))
 
-        then(listPostsInteractor).should(times(1)).listTenFirstPosts()
+        then(listPostsInteractor).should(times(1)).source()
         // .subscribe() is called through a decorator returned by .subscribeOn()
         then(listPostsObservable).should(times(1)).subscribe(any<Observer<List<Post>>>())
     }
@@ -158,9 +158,9 @@ class MainViewModelTest {
      */
     @Test
     fun `Re-subscribing errorMessage`() {
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(Observable.never())
+        given(listPostsInteractor.source()).willReturn(Observable.never())
         val refreshCompletable = spy(Completable.error(Throwable("error")))
-        given(refreshInteractor.refresh()).willReturn(refreshCompletable)
+        given(refreshInteractor.execution()).willReturn(refreshCompletable)
 
         val errorMessageObserver1 = viewModelUnderTest.errorMessage.test()
 
@@ -178,7 +178,7 @@ class MainViewModelTest {
             .assertValue("error")
 
         // .subscribe() is called through a decorator returned by .subscribeOn()
-        then(refreshInteractor).should(times(1)).refresh()
+        then(refreshInteractor).should(times(1)).execution()
         then(refreshCompletable).should(times(1)).subscribe(any<CompletableObserver>())
     }
 
@@ -189,8 +189,8 @@ class MainViewModelTest {
     @Test
     fun `Listing posts succeeds`() {
         val listPostsObservable = Observable.concat(Observable.just(listOf(post1)), Observable.never())
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(listPostsObservable)
-        given(refreshInteractor.refresh()).willReturn(Completable.complete()) // subscribed to initially
+        given(listPostsInteractor.source()).willReturn(listPostsObservable)
+        given(refreshInteractor.execution()).willReturn(Completable.complete()) // subscribed to initially
 
 
         val postListObserver = viewModelUnderTest.postList.test()
@@ -211,8 +211,8 @@ class MainViewModelTest {
     @Test
     fun `Refreshing fails`() {
         val refreshCompletable = Completable.error(Throwable("error"))
-        given(refreshInteractor.refresh()).willReturn(refreshCompletable)
-        given(listPostsInteractor.listTenFirstPosts()).willReturn(Observable.never()) // it's an infinite observable
+        given(refreshInteractor.execution()).willReturn(refreshCompletable)
+        given(listPostsInteractor.source()).willReturn(Observable.never()) // it's an infinite observable
 
         val errorMessageObserver = viewModelUnderTest.errorMessage.test()
         viewModelUnderTest.init()
