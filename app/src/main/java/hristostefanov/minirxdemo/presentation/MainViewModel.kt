@@ -15,7 +15,7 @@ import javax.inject.Inject
 @Suppress("UnstableApiUsage")
 class MainViewModel @Inject constructor(
     private val observeTenFirstPosts: ObserveTenFirstPosts,
-    private val refreshLocalDataFromRemoteService: RefreshLocalDataFromRemoteService,
+    private val refreshLocalData: RefreshLocalData,
     private val stringSupplier: StringSupplier
 ) :
     ViewModel() {
@@ -29,12 +29,12 @@ class MainViewModel @Inject constructor(
     private val _errorMessage = BehaviorSubject.createDefault("")
     val errorMessage: Observable<String> = _errorMessage
 
-    val refreshObserver: Observer<Unit> = refreshLocalDataFromRemoteService.refreshObserver
+    val refreshObserver: Observer<Unit> = refreshLocalData.refreshObserver
 
     val compositeDisposable = CompositeDisposable()
 
     fun init() {
-        refreshLocalDataFromRemoteService.statusSubject.observeOn(AndroidSchedulers.mainThread())
+        refreshLocalData.statusSubject.observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 when (it) {
                     is Failure -> {
@@ -72,7 +72,7 @@ class MainViewModel @Inject constructor(
             }
 
         // TODO call from App
-        refreshLocalDataFromRemoteService.start()
+        refreshLocalData.start()
     }
 
     override fun onCleared() {

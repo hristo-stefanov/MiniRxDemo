@@ -19,7 +19,7 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
 
-class RefreshLocalDataFromRemoteService @Inject constructor(
+class RefreshLocalData @Inject constructor(
     private val service: Service,
     private val userDAO: UserDAO,
     private val postDAO: PostDAO,

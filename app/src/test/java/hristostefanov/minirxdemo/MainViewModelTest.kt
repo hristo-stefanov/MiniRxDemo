@@ -2,7 +2,7 @@ package hristostefanov.minirxdemo
 
 import hristostefanov.minirxdemo.business.interactors.ObserveTenFirstPosts
 import hristostefanov.minirxdemo.business.Post
-import hristostefanov.minirxdemo.business.interactors.RefreshLocalDataFromRemoteService
+import hristostefanov.minirxdemo.business.interactors.RefreshLocalData
 import hristostefanov.minirxdemo.business.User
 import hristostefanov.minirxdemo.presentation.MainViewModel
 import hristostefanov.minirxdemo.business.interactors.PostFace
@@ -23,7 +23,7 @@ private const val TIMEOUT_MS = 200L
 
 class MainViewModelTest {
     private val listPostsInteractor = mock(ObserveTenFirstPosts::class.java)
-    private val refreshInteractor = mock(RefreshLocalDataFromRemoteService::class.java)
+    private val refreshInteractor = mock(RefreshLocalData::class.java)
     private val stringSupplier = object : StringSupplier {
         override fun get(resId: Int): String = "Unknown error"
     }
