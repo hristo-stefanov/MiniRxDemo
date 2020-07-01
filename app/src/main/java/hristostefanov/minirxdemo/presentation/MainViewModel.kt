@@ -2,16 +2,14 @@ package hristostefanov.minirxdemo.presentation
 
 import androidx.lifecycle.ViewModel
 import hristostefanov.minirxdemo.R
-import hristostefanov.minirxdemo.business.interactors.ObserveTenFirstPosts
-import hristostefanov.minirxdemo.business.interactors.PostFace
-import hristostefanov.minirxdemo.business.interactors.RefreshLocalDataFromRemoteService
+import hristostefanov.minirxdemo.business.interactors.*
 import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Observable
 import io.reactivex.Observer
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
@@ -31,39 +29,30 @@ class MainViewModel @Inject constructor(
     private val _errorMessage = BehaviorSubject.createDefault("")
     val errorMessage: Observable<String> = _errorMessage
 
-    // the set of Observables that can be observed is dynamic hence a Subject is used
-    private val _refreshSubject = PublishSubject.create<Unit>()
-    val refreshObserver: Observer<Unit> = _refreshSubject
+    val refreshObserver: Observer<Unit> = refreshLocalDataFromRemoteService.refreshObserver
 
     val compositeDisposable = CompositeDisposable()
 
     fun init() {
-        // infinite observable
-        val refreshTrigger = Observable.concat(Observable.just(Unit), _refreshSubject)
-
-        // using concatMap simplifies disposal of chained streams
-        refreshTrigger.concatMapCompletable {
-            refreshLocalDataFromRemoteService.execution
-                .subscribeOn(Schedulers.io())
-                .doOnError {
-                    val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
-                    _errorMessage.onNext(msg)
+        refreshLocalDataFromRemoteService.statusSubject.observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                when (it) {
+                    is Failure -> {
+                        _errorMessage.onNext(it.message)
+                        _progressIndicator.onNext(false)
+                    }
+                    is Success -> {
+                        _progressIndicator.onNext(false)
+                        _errorMessage.onNext("")
+                    }
+                    is InProgress -> {
+                        _progressIndicator.onNext(true)
+                        _errorMessage.onNext("")
+                    }
                 }
-                .doOnComplete {
-                    _errorMessage.onNext("")
-                }
-                .doOnSubscribe {
-                    _progressIndicator.onNext(true)
-                }
-                .doFinally {
-                    _progressIndicator.onNext(false)
-                }
-                // prevent disposing the trigger
-                .onErrorComplete()
-        }.subscribe().also {
+            }.also {
             compositeDisposable.add(it)
         }
-
 
         observeTenFirstPosts.source
             .subscribeOn(Schedulers.io())
@@ -81,6 +70,9 @@ class MainViewModel @Inject constructor(
             ).also {
                 compositeDisposable.add(it)
             }
+
+        // TODO call from App
+        refreshLocalDataFromRemoteService.start()
     }
 
     override fun onCleared() {
