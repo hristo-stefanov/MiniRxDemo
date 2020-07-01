@@ -8,6 +8,7 @@ import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
@@ -16,7 +17,8 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val observeTenFirstPosts: ObserveTenFirstPosts,
     private val refreshLocalData: RefreshLocalData,
-    private val stringSupplier: StringSupplier
+    private val stringSupplier: StringSupplier,
+    private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus
 ) :
     ViewModel() {
 
@@ -29,13 +31,57 @@ class MainViewModel @Inject constructor(
     private val _errorMessage = BehaviorSubject.createDefault("")
     val errorMessage: Observable<String> = _errorMessage
 
-    val refreshObserver: Observer<Unit> = refreshLocalData.refreshObserver
+    val refreshObserver: Observer<Unit> = object : Observer<Unit> {
+        override fun onNext(t: Unit) {
+            // TODO use dedicated progress indicator
+            _errorMessage.onNext("")
+            _progressIndicator.onNext(true)
+            refreshLocalData.execution.subscribe({
+                _errorMessage.onNext("")
+                _progressIndicator.onNext(false)
+            },{
+                _progressIndicator.onNext(false)
+                val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
+                _errorMessage.onNext(msg)
+            })
+
+
+            /*refreshLocalData.execute()
+                .doOnError {
+                    val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
+                    _errorMessage.onNext(msg)
+                }
+                .doOnComplete {
+                    _errorMessage.onNext("")
+                }
+                .doOnSubscribe {
+                    _errorMessage.onNext("")
+                    _progressIndicator.onNext(true)
+                }
+                .doFinally {
+                    _progressIndicator.onNext(false)
+                }
+                // prevent disposing the source
+                .onErrorComplete()
+                .also {
+                    // TODO
+                }*/
+        }
+
+        override fun onComplete() {}
+
+        override fun onSubscribe(d: Disposable) {}
+
+
+        override fun onError(e: Throwable) {}
+    }
 
     val compositeDisposable = CompositeDisposable()
 
     fun init() {
-        refreshLocalData.statusSubject.observeOn(AndroidSchedulers.mainThread())
+        observeBackgroundOperationStatus.statusSubject.observeOn(AndroidSchedulers.mainThread())
             .subscribe {
+                // TODO use a dedicated progress indicator for background ops
                 when (it) {
                     is Failure -> {
                         _errorMessage.onNext(it.message)
@@ -70,9 +116,6 @@ class MainViewModel @Inject constructor(
             ).also {
                 compositeDisposable.add(it)
             }
-
-        // TODO call from App
-        refreshLocalData.start()
     }
 
     override fun onCleared() {
