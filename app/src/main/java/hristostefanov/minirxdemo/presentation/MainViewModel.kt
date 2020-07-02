@@ -79,7 +79,7 @@ class MainViewModel @Inject constructor(
     val compositeDisposable = CompositeDisposable()
 
     fun init() {
-        observeBackgroundOperationStatus.statusSubject.observeOn(AndroidSchedulers.mainThread())
+        observeBackgroundOperationStatus.status.observeOn(AndroidSchedulers.mainThread())
             .subscribe {
                 // TODO use a dedicated progress indicator for background ops
                 when (it) {

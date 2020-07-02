@@ -15,7 +15,7 @@ class ObserveBackgroundOperationStatus @Inject  constructor(
     private val stringSupplier: StringSupplier
 ) {
     private val _statusSubject = BehaviorSubject.create<Status>()
-    val statusSubject: Observable<Status> = _statusSubject
+    val status: Observable<Status> = _statusSubject
 
     fun observeStatus(completable: Completable): Completable {
         return completable
@@ -36,3 +36,8 @@ class ObserveBackgroundOperationStatus @Inject  constructor(
             .onErrorComplete()
     }
 }
+
+sealed class Status
+object InProgress : Status()
+data class Failure(val message: String): Status()
+object Success: Status()

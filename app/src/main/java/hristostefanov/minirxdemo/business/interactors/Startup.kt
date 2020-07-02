@@ -5,15 +5,14 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class Startup @Inject constructor(
-    private val refreshTxScript: RefreshTxScript,
-    private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus
+    private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus,
+    private val refreshLocalData: RefreshLocalData
 ) {
     private val compositeDisposable = CompositeDisposable()
 
     // TODO call from App
     fun execute() {
-        observeBackgroundOperationStatus.observeStatus(refreshTxScript.execution)
-            .subscribeOn(Schedulers.io())
+        observeBackgroundOperationStatus.observeStatus(refreshLocalData.execution)
             .subscribe()
             .also {
                 compositeDisposable.add(it)
