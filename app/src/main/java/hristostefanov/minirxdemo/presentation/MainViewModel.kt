@@ -23,8 +23,11 @@ class MainViewModel @Inject constructor(
 ) :
     ViewModel() {
 
-    private val _progressIndicator = BehaviorSubject.createDefault(false)
-    val progressIndicator: Observable<Boolean> = _progressIndicator
+    private val _foregroundProgressIndicator = BehaviorSubject.createDefault(false)
+    val foregroundProgressIndicator: Observable<Boolean> = _foregroundProgressIndicator
+
+    private val _backgroundProgressIndicator = BehaviorSubject.createDefault(false)
+    val backgroundProgressIndicator: Observable<Boolean> = _backgroundProgressIndicator
 
     private val _postList = BehaviorSubject.createDefault<List<PostFace>>(emptyList())
     val postList: Observable<List<PostFace>> = _postList
@@ -32,18 +35,17 @@ class MainViewModel @Inject constructor(
     private val _errorMessage = BehaviorSubject.createDefault("")
     val errorMessage: Observable<String> = _errorMessage
 
-    val refreshObserver: Observer<Unit> = object : Observer<Unit> {
+    val refreshCommandObserver: Observer<Unit> = object : Observer<Unit> {
         override fun onNext(t: Unit) {
-            // TODO use dedicated progress indicator
             _errorMessage.onNext("")
-            _progressIndicator.onNext(true)
+            _foregroundProgressIndicator.onNext(true)
 
             // TODO what to do with this disposable? some week reference composite disposable
             requestRefreshLocalData.execution.subscribe({
                 _errorMessage.onNext("")
-                _progressIndicator.onNext(false)
+                _foregroundProgressIndicator.onNext(false)
             },{
-                _progressIndicator.onNext(false)
+                _foregroundProgressIndicator.onNext(false)
                 val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
                 _errorMessage.onNext(msg)
             })
@@ -53,11 +55,10 @@ class MainViewModel @Inject constructor(
 
         override fun onSubscribe(d: Disposable) {}
 
-
         override fun onError(e: Throwable) {}
     }
 
-    val compositeDisposable = CompositeDisposable()
+    private val compositeDisposable = CompositeDisposable()
 
     fun init() {
         observeBackgroundOperationStatus.status.observeOn(AndroidSchedulers.mainThread())
@@ -66,14 +67,14 @@ class MainViewModel @Inject constructor(
                 when (it) {
                     is Failure -> {
                         _errorMessage.onNext(it.message)
-                        _progressIndicator.onNext(false)
+                        _backgroundProgressIndicator.onNext(false)
                     }
                     is Success -> {
-                        _progressIndicator.onNext(false)
+                        _backgroundProgressIndicator.onNext(false)
                         _errorMessage.onNext("")
                     }
                     is InProgress -> {
-                        _progressIndicator.onNext(true)
+                        _backgroundProgressIndicator.onNext(true)
                         _errorMessage.onNext("")
                     }
                 }

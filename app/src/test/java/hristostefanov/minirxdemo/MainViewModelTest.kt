@@ -65,7 +65,7 @@ class MainViewModelTest {
         given(refreshInteractor.execution()).willReturn(Completable.complete())
 
         viewModelUnderTest.init()
-        viewModelUnderTest.refreshObserver.onNext(Unit)
+        viewModelUnderTest.refreshCommandObserver.onNext(Unit)
 
         // TODO check subscribing
         then(refreshInteractor).should(times(2)).execution()
