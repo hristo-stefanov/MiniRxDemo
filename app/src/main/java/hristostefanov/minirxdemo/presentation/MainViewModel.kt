@@ -16,9 +16,10 @@ import javax.inject.Inject
 @Suppress("UnstableApiUsage")
 class MainViewModel @Inject constructor(
     private val observeTenFirstPosts: ObserveTenFirstPosts,
-    private val refreshLocalData: RefreshLocalData,
+    private val requestRefreshLocalData: RequestRefreshLocalData,
     private val stringSupplier: StringSupplier,
-    private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus
+    private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus,
+    private val autoRefreshLocalDataService: AutoRefreshLocalDataService
 ) :
     ViewModel() {
 
@@ -36,7 +37,9 @@ class MainViewModel @Inject constructor(
             // TODO use dedicated progress indicator
             _errorMessage.onNext("")
             _progressIndicator.onNext(true)
-            refreshLocalData.execution.subscribe({
+
+            // TODO what to do with this disposable? some week reference composite disposable
+            requestRefreshLocalData.execution.subscribe({
                 _errorMessage.onNext("")
                 _progressIndicator.onNext(false)
             },{
@@ -44,28 +47,6 @@ class MainViewModel @Inject constructor(
                 val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
                 _errorMessage.onNext(msg)
             })
-
-
-            /*refreshLocalData.execute()
-                .doOnError {
-                    val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
-                    _errorMessage.onNext(msg)
-                }
-                .doOnComplete {
-                    _errorMessage.onNext("")
-                }
-                .doOnSubscribe {
-                    _errorMessage.onNext("")
-                    _progressIndicator.onNext(true)
-                }
-                .doFinally {
-                    _progressIndicator.onNext(false)
-                }
-                // prevent disposing the source
-                .onErrorComplete()
-                .also {
-                    // TODO
-                }*/
         }
 
         override fun onComplete() {}
@@ -116,9 +97,12 @@ class MainViewModel @Inject constructor(
             ).also {
                 compositeDisposable.add(it)
             }
+
+        autoRefreshLocalDataService.start()
     }
 
     override fun onCleared() {
+        autoRefreshLocalDataService.stop()
         // calling #dispose instead of #clear because the container will not be reused
         compositeDisposable.dispose()
         super.onCleared()

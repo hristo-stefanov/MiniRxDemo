@@ -15,6 +15,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.main_activity.*
 
 class MainActivity : AppCompatActivity() {
+
     private val viewModel: MainViewModel by viewModels {
         ViewModelFactory((application as App).component)
     }
@@ -58,6 +59,8 @@ class MainActivity : AppCompatActivity() {
         // Note: using #clear clear because the container will be reused between start-stop-start
         // transitions
         compositeDisposable.clear()
+
         super.onStop()
     }
+
 }

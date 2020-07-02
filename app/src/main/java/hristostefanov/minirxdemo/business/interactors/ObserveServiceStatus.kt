@@ -5,9 +5,7 @@ import hristostefanov.minirxdemo.utilities.StringSupplier
 import hristostefanov.minirxdemo.utilities.di.ApplicationScope
 import io.reactivex.Completable
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 @ApplicationScope

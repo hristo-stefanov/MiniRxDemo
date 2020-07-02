@@ -3,7 +3,7 @@ package hristostefanov.minirxdemo.utilities.di
 import android.app.Application
 import dagger.BindsInstance
 import dagger.Component
-import hristostefanov.minirxdemo.business.interactors.Startup
+import hristostefanov.minirxdemo.business.interactors.AutoRefreshLocalDataService
 import hristostefanov.minirxdemo.presentation.MainViewModel
 
 @ApplicationScope
@@ -15,5 +15,5 @@ interface ApplicationComponent {
     }
 
     fun getMainViewModel(): MainViewModel
-    fun getStartup(): Startup
+    fun getAutoRefreshLocalDataService(): AutoRefreshLocalDataService
 }

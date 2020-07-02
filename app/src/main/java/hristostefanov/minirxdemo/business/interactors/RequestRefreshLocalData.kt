@@ -13,7 +13,7 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Named
 
-class RefreshLocalData @Inject constructor(
+class RequestRefreshLocalData @Inject constructor(
     private val service: Service,
     private val userDAO: UserDAO,
     private val postDAO: PostDAO,
