@@ -12,7 +12,7 @@ interface PostDAO {
     @Query("DELETE FROM post")
     fun deleteAll()
 
-    @Query("SELECT * FROM post")
+    @Query("SELECT * FROM post ORDER BY title")
     @Transaction
-    fun getPostAndUserInTx(): Observable<List<PostAndUser>>
+    fun observePostAndUserSortedByTitleInTx(): Observable<List<PostAndUser>>
 }
