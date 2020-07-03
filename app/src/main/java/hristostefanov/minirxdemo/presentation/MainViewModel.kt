@@ -15,7 +15,7 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 class MainViewModel @Inject constructor(
-    private val observePostsSortedByTitle: ObservePostsSortedByTitle,
+    private val observePosts: ObservePosts,
     private val requestRefreshLocalData: RequestRefreshLocalData,
     private val stringSupplier: StringSupplier,
     private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus,
@@ -82,7 +82,7 @@ class MainViewModel @Inject constructor(
             compositeDisposable.add(it)
         }
 
-        observePostsSortedByTitle.source
+        observePosts.source
             .subscribeOn(Schedulers.io())
             .subscribe(
                 {

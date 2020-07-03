@@ -4,7 +4,7 @@ import hristostefanov.minirxdemo.business.gateways.local.PostDAO
 import io.reactivex.Observable
 import javax.inject.Inject
 
-class ObservePostsSortedByTitle @Inject constructor(private val postDAO: PostDAO) {
+class ObservePosts @Inject constructor(private val postDAO: PostDAO) {
     val source: Observable<List<PostFace>> by lazy {
         postDAO.observePostAndUserSortedByTitleInTx().map { list ->
             list

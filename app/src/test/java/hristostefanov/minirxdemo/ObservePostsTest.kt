@@ -1,6 +1,6 @@
 package hristostefanov.minirxdemo
 
-import hristostefanov.minirxdemo.business.interactors.ObservePostsSortedByTitle
+import hristostefanov.minirxdemo.business.interactors.ObservePosts
 import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.business.Repository
 import hristostefanov.minirxdemo.business.User
@@ -12,7 +12,7 @@ import org.mockito.BDDMockito.given
 import org.mockito.Mockito.mock
 
 
-class ObservePostsSortedByTitleTest {
+class ObservePostsTest {
 
     private val repository = mock(Repository::class.java)
 
@@ -25,7 +25,7 @@ class ObservePostsSortedByTitleTest {
 
         given(repository.getAllPosts()).willReturn(Observable.just(posts))
         val interactorUnderTest =
-            ObservePostsSortedByTitle(
+            ObservePosts(
                 repository
             )
 

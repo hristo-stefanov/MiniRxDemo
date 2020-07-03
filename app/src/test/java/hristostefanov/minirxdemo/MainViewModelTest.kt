@@ -1,6 +1,6 @@
 package hristostefanov.minirxdemo
 
-import hristostefanov.minirxdemo.business.interactors.ObservePostsSortedByTitle
+import hristostefanov.minirxdemo.business.interactors.ObservePosts
 import hristostefanov.minirxdemo.business.Post
 import hristostefanov.minirxdemo.business.interactors.RequestRefreshLocalData
 import hristostefanov.minirxdemo.business.User
@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 private const val TIMEOUT_MS = 200L
 
 class MainViewModelTest {
-    private val listPostsInteractor = mock(ObservePostsSortedByTitle::class.java)
+    private val listPostsInteractor = mock(ObservePosts::class.java)
     private val refreshInteractor = mock(RequestRefreshLocalData::class.java)
     private val stringSupplier = object : StringSupplier {
         override fun get(resId: Int): String = "Unknown error"
