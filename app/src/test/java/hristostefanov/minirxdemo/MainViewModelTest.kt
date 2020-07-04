@@ -20,7 +20,8 @@ class MainViewModelTest {
     private val autoRefreshLocalDataService = mock(AutoRefreshLocalDataService::class.java)
     private val observePosts = mock(ObservePosts::class.java)
     private val requestRefreshLocalData = mock(RequestRefreshLocalData::class.java)
-    private val observeBackgroundOperationStatus = mock(ObserveBackgroundOperationStatus::class.java)
+    private val observeBackgroundOperationStatus =
+        mock(ObserveBackgroundOperationStatus::class.java)
 
     private val requestRefreshCompletable = spy(Completable.complete())
 
@@ -28,11 +29,17 @@ class MainViewModelTest {
         override fun get(resId: Int): String = "Unknown error"
     }
     val viewModelUnderTest: MainViewModel by lazy {
-        MainViewModel(observePosts, requestRefreshLocalData, stringSupplier, observeBackgroundOperationStatus, autoRefreshLocalDataService)
+        MainViewModel(
+            observePosts,
+            requestRefreshLocalData,
+            stringSupplier,
+            observeBackgroundOperationStatus,
+            autoRefreshLocalDataService
+        )
     }
 
     // test data
-    val post1 = PostFace( "Title", "body")
+    val post1 = PostFace("Title", "body")
 
     @Before
     fun beforeAll() {
@@ -43,35 +50,18 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Create`() {
-//        given(listPostsInteractor.source()).willReturn(Observable.just(emptyList()))
-//        given(refreshInteractor.execution()).willReturn(Completable.complete())
-
+    fun `Starts autoRefreshLocalDataService when initialized`() {
         viewModelUnderTest.init()
-
         then(autoRefreshLocalDataService).should().start()
-
-//        then(listPostsInteractor).should().source()
-//        then(listPostsInteractor).shouldHaveNoMoreInteractions()
-//        then(refreshInteractor).should().execution()
-//        then(refreshInteractor).shouldHaveNoMoreInteractions()
     }
 
-    // TODO is this a rule?
     @Test
-    fun `Subscribe to inputs on IO scheduler`() {
+    fun `Stops autoRefreshLocalDataService when cleared`() {
         fail()
-/*        val observableSpy = Mockito.spy(Observable.never<List<Post>>())
-        given(listPostsInteractor.source()).willReturn(observableSpy)
-        given(refreshInteractor.execution()).willReturn(Completable.complete())
-
-        viewModelUnderTest.init()
-
-        then(observableSpy).should().subscribeOn(Schedulers.io())*/
     }
 
     @Test
-    fun `Refresh command`() {
+    fun `Executes requestRefreshLocalData on Refresh command`() {
         viewModelUnderTest.init()
 
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
@@ -85,8 +75,9 @@ class MainViewModelTest {
      * Rule: observable output properties are infinite
      */
     @Test
-    fun `WHEN postList emits THEN will not complete`() {
-        val listPostsObservable = Observable.concat(Observable.just(listOf(post1)), Observable.never())
+    fun `MVVM - WHEN observePosts emits THEN will not complete`() {
+        val listPostsObservable =
+            Observable.concat(Observable.just(listOf(post1)), Observable.never())
         given(observePosts.source).willReturn(listPostsObservable)
 
         val observer = viewModelUnderTest.postList.test()
@@ -103,15 +94,17 @@ class MainViewModelTest {
      * Rule: observable output properties are infinite
      */
     @Test
-    fun `WHEN errorMessage emits THEN will not complete`() {
-        val errorInfiniteObservable = Observable.concat<Status>(Observable.just(Failure("error")), Observable.never())
+    fun `MVVM - WHEN errorMessage emits THEN will not complete`() {
+        val errorInfiniteObservable =
+            Observable.concat<Status>(Observable.just(Failure("error")), Observable.never())
         given(observeBackgroundOperationStatus.status).willReturn(errorInfiniteObservable)
 
         val observer = viewModelUnderTest.errorMessage.test()
         viewModelUnderTest.init()
 
         // expecting default value + payload
-        observer.awaitCount(2).assertValueCount(2) // awaitCount may fail with time-out hence the assert
+        observer.awaitCount(2)
+            .assertValueCount(2) // awaitCount may fail with time-out hence the assert
         observer.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
@@ -125,8 +118,9 @@ class MainViewModelTest {
      * * must not re-subscribe to the interactor output
      */
     @Test
-    fun `Re-subscribing postList`() {
-        val listPostsObservableSpy = spy(Observable.concat(Observable.just(listOf(post1)), Observable.never()))
+    fun `MVVM - Re-subscribing postList`() {
+        val listPostsObservableSpy =
+            spy(Observable.concat(Observable.just(listOf(post1)), Observable.never()))
         given(observePosts.source).willReturn(listPostsObservableSpy)
         val observer1 = viewModelUnderTest.postList.test()
         viewModelUnderTest.init()
@@ -154,8 +148,9 @@ class MainViewModelTest {
      * * must not re-subscribe to the interactor output
      */
     @Test
-    fun `Re-subscribing errorMessage`() {
-        val errorInfiniteObservable = spy(Observable.concat<Status>(Observable.just(Failure("error")), Observable.never()))
+    fun `MVVM Re-subscribing errorMessage`() {
+        val errorInfiniteObservable =
+            spy(Observable.concat<Status>(Observable.just(Failure("error")), Observable.never()))
         given(observeBackgroundOperationStatus.status).willReturn(errorInfiniteObservable)
 
         val observer1 = viewModelUnderTest.errorMessage.test()
@@ -181,8 +176,9 @@ class MainViewModelTest {
      * Rule: map [Post] to [PostFace]
      */
     @Test
-    fun `Listing posts succeeds`() {
-        val listPostsObservable = Observable.concat(Observable.just(listOf(post1)), Observable.never())
+    fun `Routes observePosts emissions to postList`() {
+        val listPostsObservable =
+            Observable.concat(Observable.just(listOf(post1)), Observable.never())
         given(observePosts.source).willReturn(listPostsObservable)
 
         val postListObserver = viewModelUnderTest.postList.test()
@@ -196,7 +192,7 @@ class MainViewModelTest {
      *  Rule: map [Throwable] to [String]
      */
     @Test
-    fun `Request Refresh fails`() {
+    fun `Routes requestRefreshLocalData errors to errorMessage`() {
         val errorCompletable = Completable.error(Throwable("error"))
         given(requestRefreshLocalData.execution).willReturn(errorCompletable)
 
@@ -211,8 +207,15 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Refreshing succeeds`() {
+    fun `Keeps foregroundProgressIndicator set while requestRefreshLocalData is executing`() {
         // TODO implement
         fail()
     }
+
+    @Test
+    fun `Keeps backgroundProgressIndicator set while observeBackgroundOperationStatus reports InProgress`() {
+        // TODO implement
+        fail()
+    }
+
 }
