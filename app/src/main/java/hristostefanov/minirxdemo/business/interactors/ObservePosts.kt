@@ -18,6 +18,7 @@ class ObservePosts @Inject constructor(private val postDAO: PostDAO) {
     }
 }
 
+// TODO DisplayablePost?
 data class PostFace(
     val title: String,
     val username: String
