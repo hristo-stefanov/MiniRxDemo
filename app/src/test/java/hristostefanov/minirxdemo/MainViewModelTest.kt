@@ -74,30 +74,9 @@ class MainViewModelTest {
         then(requestRefreshCompletable).should().subscribe(any<CompletableObserver>())
     }
 
-    /**
-     * Rule: observable output properties are infinite
-     */
+
     @Test
-    fun `MVVM - WHEN observePosts emits THEN will not complete`() {
-        val listPostsObservable =
-            Observable.concat(Observable.just(listOf(post1)), Observable.never())
-        given(observePosts.source).willReturn(listPostsObservable)
-
-        val observer = viewModelUnderTest.postList.test()
-        viewModelUnderTest.init()
-
-        // expecting default value + payload
-        observer.awaitCount(2)
-        // await onComplete or onError, but expected to just time out
-        observer.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)
-        observer.assertNotTerminated()
-    }
-
-    /**
-     * Rule: observable output properties are infinite
-     */
-    @Test
-    fun `MVVM - WHEN errorMessage emits THEN will not complete`() {
+    fun `Routes #observeBackgroundOperationStatus Failures to #errorMessage without terminating it`() {
         val errorInfiniteObservable =
             Observable.concat<Status>(Observable.just(Failure("error")), Observable.never())
         given(observeBackgroundOperationStatus.status).willReturn(errorInfiniteObservable)
@@ -108,7 +87,7 @@ class MainViewModelTest {
         // expecting default value + payload
         observer.awaitCount(2)
             .assertValueCount(2) // awaitCount may fail with time-out hence the assert
-        observer.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 
@@ -175,20 +154,23 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Routes observePosts emissions to postList`() {
+    fun `Routes #observePosts emissions to #postList without terminating it`() {
         val listPostsObservable =
             Observable.concat(Observable.just(listOf(post1)), Observable.never())
         given(observePosts.source).willReturn(listPostsObservable)
 
-        val postListObserver = viewModelUnderTest.postList.test()
+        val observer = viewModelUnderTest.postList.test()
         viewModelUnderTest.init()
 
         // expecting the default value + payload
-        postListObserver.awaitCount(2).assertValueAt(1, listOf(post1))
+        observer.awaitCount(2).assertValueAt(1, listOf(post1))
+
+        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.assertNotTerminated()
     }
 
     @Test
-    fun `Routes requestRefreshLocalData errors to errorMessage`() {
+    fun `Routes #requestRefreshLocalData errors to #errorMessage without terminating it`() {
         val errorCompletable = Completable.error(Throwable("error"))
         given(requestRefreshLocalData.execution).willReturn(errorCompletable)
         val observer = viewModelUnderTest.errorMessage.test()
@@ -197,8 +179,10 @@ class MainViewModelTest {
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
 
         // wait the default value, one empty string and the payload
-        observer.awaitCount(3).assertValueCount(3)
-        observer.assertValueAt(2, "error")
+        observer.awaitCount(3).assertValueAt(2, "error")
+
+        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.assertNotTerminated()
     }
 
 
