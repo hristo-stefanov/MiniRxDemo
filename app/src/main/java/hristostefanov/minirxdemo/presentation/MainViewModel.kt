@@ -87,12 +87,9 @@ class MainViewModel @Inject constructor(
                 {
                     _postList.onNext(it)
                 }, {
-                    // this is an observable query which returns infinite stream so it is not supposed
-                    // to emit terminal events like error, but we handle it because it could be some
-                    // db related error
-                    _errorMessage.onNext(it.message ?: stringSupplier.get(R.string.unknown_error))
+                    throw AssertionError("Infinite stream should not terminate with error", it)
                 }, {
-                    throw AssertionError("Should not complete")
+                    throw AssertionError("Infinite stream should not complete")
                 }
             ).also {
                 compositeDisposable.add(it)
@@ -101,7 +98,7 @@ class MainViewModel @Inject constructor(
         autoRefreshLocalDataService.start()
     }
 
-    override fun onCleared() {
+    public override fun onCleared() {
         autoRefreshLocalDataService.stop()
         // calling #dispose instead of #clear because the container will not be reused
         compositeDisposable.dispose()

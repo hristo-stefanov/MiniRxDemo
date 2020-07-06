@@ -7,7 +7,7 @@ import io.reactivex.Completable
 import io.reactivex.CompletableObserver
 import io.reactivex.Observable
 import io.reactivex.Observer
-import junit.framework.Assert.fail
+import io.reactivex.subjects.PublishSubject
 import org.junit.Before
 import org.junit.Test
 import org.mockito.BDDMockito.*
@@ -28,7 +28,8 @@ class MainViewModelTest {
     private val stringSupplier = object : StringSupplier {
         override fun get(resId: Int): String = "Unknown error"
     }
-    val viewModelUnderTest: MainViewModel by lazy {
+
+    private val viewModelUnderTest: MainViewModel by lazy {
         MainViewModel(
             observePosts,
             requestRefreshLocalData,
@@ -39,25 +40,29 @@ class MainViewModelTest {
     }
 
     // test data
-    val post1 = PostFace("Title", "body")
+    private val post1 = PostFace("Title", "body")
 
     @Before
     fun beforeAll() {
         given(observeBackgroundOperationStatus.status).willReturn(Observable.never())
         given(observePosts.source).willReturn(Observable.never())
         given(requestRefreshLocalData.execution).willReturn(requestRefreshCompletable)
-        // TODO observePosts?
     }
 
     @Test
     fun `Starts autoRefreshLocalDataService when initialized`() {
         viewModelUnderTest.init()
+
         then(autoRefreshLocalDataService).should().start()
     }
 
     @Test
     fun `Stops autoRefreshLocalDataService when cleared`() {
-        fail()
+        viewModelUnderTest.init()
+
+        viewModelUnderTest.onCleared()
+
+        then(autoRefreshLocalDataService).should().stop()
     }
 
     @Test
@@ -66,8 +71,6 @@ class MainViewModelTest {
 
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
 
-        then(requestRefreshLocalData).should().execution
-        then(requestRefreshLocalData).shouldHaveNoMoreInteractions()
         then(requestRefreshCompletable).should().subscribe(any<CompletableObserver>())
     }
 
@@ -171,10 +174,6 @@ class MainViewModelTest {
         then(errorInfiniteObservable).should(times(1)).subscribe(any<Observer<Status>>())
     }
 
-
-    /**
-     * Rule: map [Post] to [PostFace]
-     */
     @Test
     fun `Routes observePosts emissions to postList`() {
         val listPostsObservable =
@@ -188,34 +187,86 @@ class MainViewModelTest {
         postListObserver.awaitCount(2).assertValueAt(1, listOf(post1))
     }
 
-    /**
-     *  Rule: map [Throwable] to [String]
-     */
     @Test
     fun `Routes requestRefreshLocalData errors to errorMessage`() {
         val errorCompletable = Completable.error(Throwable("error"))
         given(requestRefreshLocalData.execution).willReturn(errorCompletable)
-
         val observer = viewModelUnderTest.errorMessage.test()
         viewModelUnderTest.init()
+
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
 
-        // TODO too much details about internal workings here
-        // expecting the default value + one empty string + payload
+        // wait the default value, one empty string and the payload
         observer.awaitCount(3).assertValueCount(3)
         observer.assertValueAt(2, "error")
     }
 
+
     @Test
-    fun `Keeps foregroundProgressIndicator set while requestRefreshLocalData is executing`() {
-        // TODO implement
-        fail()
+    fun `Sets foregroundProgressIndicator when starts executing requestRefreshLocalData`() {
+        val observer = viewModelUnderTest.foregroundProgressIndicator.test()
+        viewModelUnderTest.init()
+
+        viewModelUnderTest.refreshCommandObserver.onNext(Unit)
+
+        // await two values - the default and true
+        observer.awaitCount(2).assertValueAt(1,true)
     }
 
     @Test
-    fun `Keeps backgroundProgressIndicator set while observeBackgroundOperationStatus reports InProgress`() {
-        // TODO implement
-        fail()
+    fun `Clears foregroundProgressIndicator when requestRefreshLocalData execution completes`() {
+        val executionSubject = PublishSubject.create<Unit>()
+        given(requestRefreshLocalData.execution).willReturn(Completable.fromObservable(executionSubject))
+        val observer = viewModelUnderTest.foregroundProgressIndicator.test()
+        viewModelUnderTest.refreshCommandObserver.onNext(Unit)
+        // await two values - the default and true
+        observer.awaitCount(2).assertValueAt(1,true)
+
+        executionSubject.onComplete()
+
+        observer.awaitCount(3).assertValueAt(2, false)
+    }
+
+
+    @Test
+    fun `Sets backgroundProgressIndicator when observeBackgroundOperationStatus reports InProgress`() {
+        given(observeBackgroundOperationStatus.status).willReturn(Observable.concat(Observable.just(InProgress), Observable.never()))
+        val observer = viewModelUnderTest.backgroundProgressIndicator.test()
+
+        viewModelUnderTest.init()
+
+        // await two values - the default and true
+        observer.awaitCount(2).assertValueAt(1, true)
+    }
+
+    @Test
+    fun `Clears backgroundProgressIndicator when observeBackgroundOperationStatus reports Success`() {
+        val statusSubject = PublishSubject.create<Status>()
+        given(observeBackgroundOperationStatus.status).willReturn(statusSubject)
+        val observer = viewModelUnderTest.backgroundProgressIndicator.test()
+        viewModelUnderTest.init()
+        statusSubject.onNext(InProgress)
+        // await two values - the default and true
+        observer.awaitCount(2).assertValueAt(1, true)
+
+        statusSubject.onNext(Success)
+
+        observer.awaitCount(3).assertValueAt(2, false)
+    }
+
+    @Test
+    fun `Clears backgroundProgressIndicator when observeBackgroundOperationStatus reports Failure`() {
+        val statusSubject = PublishSubject.create<Status>()
+        given(observeBackgroundOperationStatus.status).willReturn(statusSubject)
+        val observer = viewModelUnderTest.backgroundProgressIndicator.test()
+        viewModelUnderTest.init()
+        statusSubject.onNext(InProgress)
+        // await two values - the default and true
+        observer.awaitCount(2).assertValueAt(1, true)
+
+        statusSubject.onNext(Failure("error"))
+
+        observer.awaitCount(3).assertValueAt(2, false)
     }
 
 }
