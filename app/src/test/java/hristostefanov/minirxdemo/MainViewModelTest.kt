@@ -6,7 +6,6 @@ import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Completable
 import io.reactivex.CompletableObserver
 import io.reactivex.Observable
-import io.reactivex.Observer
 import io.reactivex.subjects.PublishSubject
 import org.junit.Before
 import org.junit.Test
@@ -92,65 +91,31 @@ class MainViewModelTest {
     }
 
 
-    /**
-     * Rules:
-     *
-     * When re-subscribing to an output:
-     * * must re-emit the last value of the output
-     * * must not re-subscribe to the interactor output
-     */
     @Test
-    fun `MVVM - Re-subscribing postList`() {
+    fun `Keeps #postList state`() {
         val listPostsObservableSpy =
             spy(Observable.concat(Observable.just(listOf(post1)), Observable.never()))
         given(observePosts.source).willReturn(listPostsObservableSpy)
-        val observer1 = viewModelUnderTest.postList.test()
-        viewModelUnderTest.init()
-        // await the default + new emission, assert the value count cause awaitCount may timeout
-        observer1.awaitCount(2).assertValueCount(2)
 
-        // re-subscribe
-        observer1.dispose()
-        val observer2 = viewModelUnderTest.postList.test()
-
-        observer2
-            .awaitCount(1) // getting only the latest emission
-            .assertValue(listOf(post1))
-
-        // .subscribe() is called through a decorator returned by .subscribeOn()
-        then(listPostsObservableSpy).should(times(1)).subscribe(any<Observer<List<PostFace>>>())
+        testViewModelKeepsStateOfProperty(
+            listPostsObservableSpy,
+            viewModelUnderTest.postList,
+            viewModelUnderTest::init
+        )
     }
 
-    /**
-     * Rules:
-     *
-     * When re-subscribing to an output:
-     * * must re-emit the last value of the output
-     * * must not re-execute the interactor
-     * * must not re-subscribe to the interactor output
-     */
+
     @Test
-    fun `MVVM Re-subscribing errorMessage`() {
-        val errorInfiniteObservable =
+    fun `Keeps #errorMessage state`() {
+        val sourceObservableSpy =
             spy(Observable.concat<Status>(Observable.just(Failure("error")), Observable.never()))
-        given(observeBackgroundOperationStatus.status).willReturn(errorInfiniteObservable)
+        given(observeBackgroundOperationStatus.status).willReturn(sourceObservableSpy)
 
-        val observer1 = viewModelUnderTest.errorMessage.test()
-        viewModelUnderTest.init()
-
-        // await the default + new emission, assert the value count cause awaitCount may timeout
-        observer1.awaitCount(2).assertValueCount(2)
-
-        // re-subscribe
-        observer1.dispose()
-        val errorMessageObserver2 = viewModelUnderTest.errorMessage.test()
-
-        errorMessageObserver2
-            .awaitCount(1) // getting only the latest emission
-            .assertValue("error")
-
-        // .subscribe() is called through a decorator returned by .subscribeOn()
-        then(errorInfiniteObservable).should(times(1)).subscribe(any<Observer<Status>>())
+        testViewModelKeepsStateOfProperty(
+            sourceObservableSpy,
+            viewModelUnderTest.errorMessage,
+            viewModelUnderTest::init
+        )
     }
 
     @Test
@@ -194,17 +159,21 @@ class MainViewModelTest {
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
 
         // await two values - the default and true
-        observer.awaitCount(2).assertValueAt(1,true)
+        observer.awaitCount(2).assertValueAt(1, true)
     }
 
     @Test
     fun `Clears foregroundProgressIndicator when requestRefreshLocalData execution completes`() {
         val executionSubject = PublishSubject.create<Unit>()
-        given(requestRefreshLocalData.execution).willReturn(Completable.fromObservable(executionSubject))
+        given(requestRefreshLocalData.execution).willReturn(
+            Completable.fromObservable(
+                executionSubject
+            )
+        )
         val observer = viewModelUnderTest.foregroundProgressIndicator.test()
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
         // await two values - the default and true
-        observer.awaitCount(2).assertValueAt(1,true)
+        observer.awaitCount(2).assertValueAt(1, true)
 
         executionSubject.onComplete()
 
@@ -214,7 +183,13 @@ class MainViewModelTest {
 
     @Test
     fun `Sets backgroundProgressIndicator when observeBackgroundOperationStatus reports InProgress`() {
-        given(observeBackgroundOperationStatus.status).willReturn(Observable.concat(Observable.just(InProgress), Observable.never()))
+        given(observeBackgroundOperationStatus.status).willReturn(
+            Observable.concat(
+                Observable.just(
+                    InProgress
+                ), Observable.never()
+            )
+        )
         val observer = viewModelUnderTest.backgroundProgressIndicator.test()
 
         viewModelUnderTest.init()
