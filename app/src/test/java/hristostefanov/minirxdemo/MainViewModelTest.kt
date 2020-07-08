@@ -49,14 +49,14 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Starts autoRefreshLocalDataService when initialized`() {
+    fun `Starts @AutoRefreshLocalDataService when initialized`() {
         viewModelUnderTest.init()
 
         then(autoRefreshLocalDataService).should().start()
     }
 
     @Test
-    fun `Stops autoRefreshLocalDataService when cleared`() {
+    fun `Stops @AutoRefreshLocalDataService when cleared`() {
         viewModelUnderTest.init()
 
         viewModelUnderTest.onCleared()
@@ -65,7 +65,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Executes requestRefreshLocalData on Refresh command`() {
+    fun `Executes @RequestRefreshLocalData on Refresh command`() {
         viewModelUnderTest.init()
 
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
@@ -75,7 +75,7 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Routes #observeBackgroundOperationStatus Failures to #errorMessage without terminating it`() {
+    fun `Routes @ObserveBackgroundOperationStatus Failures to #errorMessage without terminating it`() {
         val errorInfiniteObservable =
             Observable.concat<Status>(Observable.just(Failure("error")), Observable.never())
         given(observeBackgroundOperationStatus.status).willReturn(errorInfiniteObservable)
@@ -119,7 +119,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Routes #observePosts emissions to #postList without terminating it`() {
+    fun `Routes @ObservePosts emissions to #postList without terminating it`() {
         val listPostsObservable =
             Observable.concat(Observable.just(listOf(post1)), Observable.never())
         given(observePosts.source).willReturn(listPostsObservable)
@@ -135,7 +135,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Routes #requestRefreshLocalData errors to #errorMessage without terminating it`() {
+    fun `Routes @RequestRefreshLocalData errors to #errorMessage without terminating it`() {
         val errorCompletable = Completable.error(Throwable("error"))
         given(requestRefreshLocalData.execution).willReturn(errorCompletable)
         val observer = viewModelUnderTest.errorMessage.test()
@@ -152,7 +152,7 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Sets foregroundProgressIndicator when starts executing requestRefreshLocalData`() {
+    fun `Sets #foregroundProgressIndicator when starts executing Refresh command`() {
         val observer = viewModelUnderTest.foregroundProgressIndicator.test()
         viewModelUnderTest.init()
 
@@ -163,7 +163,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears foregroundProgressIndicator when requestRefreshLocalData execution completes`() {
+    fun `Clears #foregroundProgressIndicator when @RequestRefreshLocalData execution completes`() {
         val executionSubject = PublishSubject.create<Unit>()
         given(requestRefreshLocalData.execution).willReturn(
             Completable.fromObservable(
@@ -182,7 +182,7 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Sets backgroundProgressIndicator when observeBackgroundOperationStatus reports InProgress`() {
+    fun `Sets #backgroundProgressIndicator when @ObserveBackgroundOperationStatus reports "InProgress"`() {
         given(observeBackgroundOperationStatus.status).willReturn(
             Observable.concat(
                 Observable.just(
@@ -199,7 +199,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears backgroundProgressIndicator when observeBackgroundOperationStatus reports Success`() {
+    fun `Clears #backgroundProgressIndicator when @ObserveBackgroundOperationStatus reports "Success"`() {
         val statusSubject = PublishSubject.create<Status>()
         given(observeBackgroundOperationStatus.status).willReturn(statusSubject)
         val observer = viewModelUnderTest.backgroundProgressIndicator.test()
@@ -214,7 +214,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears backgroundProgressIndicator when observeBackgroundOperationStatus reports Failure`() {
+    fun `Clears #backgroundProgressIndicator when @ObserveBackgroundOperationStatus reports "Failure"`() {
         val statusSubject = PublishSubject.create<Status>()
         given(observeBackgroundOperationStatus.status).willReturn(statusSubject)
         val observer = viewModelUnderTest.backgroundProgressIndicator.test()

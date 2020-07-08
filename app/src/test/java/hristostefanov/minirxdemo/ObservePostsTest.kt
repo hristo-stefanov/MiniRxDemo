@@ -1,53 +1,47 @@
 package hristostefanov.minirxdemo
 
+import hristostefanov.minirxdemo.business.entities.Post
+import hristostefanov.minirxdemo.business.entities.User
+import hristostefanov.minirxdemo.business.gateways.local.PostAndUser
+import hristostefanov.minirxdemo.business.gateways.local.PostDAO
 import hristostefanov.minirxdemo.business.interactors.ObservePosts
+import hristostefanov.minirxdemo.business.interactors.PostFace
 import io.reactivex.Observable
-import junit.framework.Assert
-import org.hamcrest.CoreMatchers.equalTo
-import org.junit.Assert.assertThat
+import io.reactivex.schedulers.Schedulers
 import org.junit.Test
 import org.mockito.BDDMockito.given
+import org.mockito.BDDMockito.then
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.spy
 
 
 class ObservePostsTest {
+    private val dao = mock(PostDAO::class.java)
+    private val unit = ObservePosts(dao)
 
-//    private val repository = mock(Repository::class.java)
-//
-
-
-    // TODO is this a rule?
+    // TODO is the name ok?
     @Test
-    fun `Subscribe to inputs on IO scheduler`() {
-        Assert.fail()
-/*        val observableSpy = Mockito.spy(Observable.never<List<Post>>())
-        given(listPostsInteractor.source()).willReturn(observableSpy)
-        given(refreshInteractor.execution()).willReturn(Completable.complete())
+    fun `Maps @PostDAO#observePostAndUserSortedByTitleInTx emissions to @PostFace`() {
+        val observable = Observable.concat(Observable.just(listOf(
+            PostAndUser(Post(1, "title", "body",11),
+                User(11, "username"))
+        )), Observable.never())
+        given(dao.observePostAndUserSortedByTitleInTx()).willReturn(observable)
 
-        viewModelUnderTest.init()
+        val observer = unit.source.test()
 
-        then(observableSpy).should().subscribeOn(Schedulers.io())*/
+        then(dao).should().observePostAndUserSortedByTitleInTx()
+        observer.awaitCount(1).assertValueCount(1)
+            .assertValueAt(0, listOf(PostFace("title", "@username")))
     }
 
+    @Test
+    fun `Subscribes on IO scheduler`() {
+        val observableSpy = spy(Observable.never<List<PostAndUser>>())
+        given(dao.observePostAndUserSortedByTitleInTx()).willReturn(observableSpy)
 
-//    @Test
-//    // Rule: List 10 first posts.
-//    fun `When receiving a list of 11 Posts Then will emit a mapped list of 10 PostInfo`() {
-//        val posts = (1..11).map {
-//            Post(it, it.toString(), "body $it", User(42, "user42"))
-//        }
-//
-//        given(repository.getAllPosts()).willReturn(Observable.just(posts))
-//        val interactorUnderTest =
-//            ObservePosts(
-//                repository
-//            )
-//
-//        val observer = interactorUnderTest.source().test()
-//
-//        val result = observer.values()[0]
-//        assertThat(result.size, equalTo(10))
-//        assertThat(result[0].title, equalTo("1"))
-//        assertThat(result[0].user.username, equalTo("user42"))
-//    }
+        unit.source
+
+        then(observableSpy).should().subscribeOn(Schedulers.io())
+    }
 }

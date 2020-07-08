@@ -82,7 +82,6 @@ class MainViewModel @Inject constructor(
         }
 
         observePosts.source
-            .subscribeOn(Schedulers.io())
             .subscribe(
                 {
                     _postList.onNext(it)
