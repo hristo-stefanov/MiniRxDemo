@@ -7,8 +7,8 @@ import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.BehaviorSubject
+import io.reactivex.subjects.PublishSubject
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
@@ -33,48 +33,43 @@ class MainViewModel @Inject constructor(
     private val _errorMessage = BehaviorSubject.createDefault("")
     val errorMessage: Observable<String> = _errorMessage
 
-    val refreshCommandObserver: Observer<Unit> = object : Observer<Unit> {
-        override fun onNext(t: Unit) {
-            _errorMessage.onNext("")
-            _foregroundProgressIndicator.onNext(true)
-
-            // TODO what to do with this disposable? some week reference composite disposable
-            requestRefreshLocalData.execution.subscribe({
-                _errorMessage.onNext("")
-                _foregroundProgressIndicator.onNext(false)
-            },{
-                _foregroundProgressIndicator.onNext(false)
-                val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
-                _errorMessage.onNext(msg)
-            })
-        }
-
-        override fun onComplete() {}
-
-        override fun onSubscribe(d: Disposable) {}
-
-        override fun onError(e: Throwable) {}
-    }
+    private val _refreshCommandSubject = PublishSubject.create<Unit>()
+    val refreshCommandObserver: Observer<Unit> = _refreshCommandSubject
 
     private val compositeDisposable = CompositeDisposable()
 
     fun init() {
+        // using concatMap to auto-dispose the mapped completable when this VM is cleared
+        _refreshCommandSubject.concatMapCompletable {
+            requestRefreshLocalData.execution.doOnSubscribe {
+                _errorMessage.onNext("")
+                _foregroundProgressIndicator.onNext(true)
+            }.doOnError {
+                val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
+                _errorMessage.onNext(msg)
+            }.doFinally {
+                _foregroundProgressIndicator.onNext(false)
+            }.onErrorComplete() // prevent disposing the source on error
+        }.subscribe().also {
+            compositeDisposable.add(it)
+        }
+
         observeBackgroundOperationStatus.status.subscribe {
-                when (it) {
-                    is Failure -> {
-                        _errorMessage.onNext(it.message)
-                        _backgroundProgressIndicator.onNext(false)
-                    }
-                    is Success -> {
-                        _backgroundProgressIndicator.onNext(false)
-                        _errorMessage.onNext("")
-                    }
-                    is InProgress -> {
-                        _backgroundProgressIndicator.onNext(true)
-                        _errorMessage.onNext("")
-                    }
+            when (it) {
+                is Failure -> {
+                    _errorMessage.onNext(it.message)
+                    _backgroundProgressIndicator.onNext(false)
                 }
-            }.also {
+                is Success -> {
+                    _backgroundProgressIndicator.onNext(false)
+                    _errorMessage.onNext("")
+                }
+                is InProgress -> {
+                    _backgroundProgressIndicator.onNext(true)
+                    _errorMessage.onNext("")
+                }
+            }
+        }.also {
             compositeDisposable.add(it)
         }
 

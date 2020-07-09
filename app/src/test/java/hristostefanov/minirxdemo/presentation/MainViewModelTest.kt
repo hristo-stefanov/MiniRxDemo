@@ -171,6 +171,7 @@ class MainViewModelTest {
             )
         )
         val observer = viewModelUnderTest.foregroundProgressIndicator.test()
+        viewModelUnderTest.init()
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
         // await two values - the default and true
         observer.awaitCount(2).assertValueAt(1, true)
