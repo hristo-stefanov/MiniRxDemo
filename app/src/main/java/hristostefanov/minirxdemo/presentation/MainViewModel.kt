@@ -27,8 +27,8 @@ class MainViewModel @Inject constructor(
     private val _backgroundProgressIndicator = BehaviorSubject.createDefault(false)
     val backgroundProgressIndicator: Observable<Boolean> = _backgroundProgressIndicator
 
-    private val _postList = BehaviorSubject.createDefault<List<PostSummary>>(emptyList())
-    val postList: Observable<List<PostSummary>> = _postList
+    private val _postList = BehaviorSubject.createDefault<List<FormattedPostSummary>>(emptyList())
+    val postList: Observable<List<FormattedPostSummary>> = _postList
 
     private val _errorMessage = BehaviorSubject.createDefault("")
     val errorMessage: Observable<String> = _errorMessage
@@ -60,7 +60,6 @@ class MainViewModel @Inject constructor(
 
     fun init() {
         observeBackgroundOperationStatus.status.subscribe {
-                // TODO use a dedicated progress indicator for background ops
                 when (it) {
                     is Failure -> {
                         _errorMessage.onNext(it.message)
@@ -81,8 +80,11 @@ class MainViewModel @Inject constructor(
 
         observePosts.source
             .subscribe(
-                {
-                    _postList.onNext(it)
+                { list ->
+                    val formattedList = list.map {
+                        FormattedPostSummary(it.title, "@${it.username}")
+                    }
+                    _postList.onNext(formattedList)
                 }, {
                     throw AssertionError("Infinite stream should not terminate with error", it)
                 }, {

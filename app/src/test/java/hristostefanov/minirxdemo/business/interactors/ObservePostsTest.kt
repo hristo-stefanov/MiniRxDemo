@@ -30,7 +30,7 @@ class ObservePostsTest {
 
         then(dao).should().observePostAndUserSortedByTitleInTx()
         observer.awaitCount(1).assertValueCount(1)
-            .assertValueAt(0, listOf(PostSummary("title", "@username")))
+            .assertValueAt(0, listOf(PostSummary("title", "username")))
     }
 
     @Test

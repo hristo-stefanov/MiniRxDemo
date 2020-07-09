@@ -38,7 +38,8 @@ class MainViewModelTest {
     }
 
     // test data
-    private val post1 = PostSummary("Title", "body")
+    private val post1 = PostSummary("Title", "username")
+    val formattedPost1 = FormattedPostSummary("Title", "@username")
 
     @Before
     fun beforeAll() {
@@ -118,7 +119,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Routes @ObservePosts emissions to #postList without terminating it`() {
+    fun `Routes and formats @ObservePosts emissions to #postList without terminating it`() {
         val listPostsObservable =
             Observable.concat(Observable.just(listOf(post1)), Observable.never())
         given(observePosts.source).willReturn(listPostsObservable)
@@ -127,7 +128,7 @@ class MainViewModelTest {
         viewModelUnderTest.init()
 
         // expecting the default value + payload
-        observer.awaitCount(2).assertValueAt(1, listOf(post1))
+        observer.awaitCount(2).assertValueAt(1, listOf(formattedPost1))
 
         observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()

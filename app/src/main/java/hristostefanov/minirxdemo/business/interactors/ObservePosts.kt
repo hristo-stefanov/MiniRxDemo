@@ -14,7 +14,7 @@ class ObservePosts @Inject constructor(private val postDAO: PostDAO) {
                 .map {
                     PostSummary(
                         it.post.title,
-                        "@${it.user.username}"
+                        it.user.username
                     )
                 }
         }
