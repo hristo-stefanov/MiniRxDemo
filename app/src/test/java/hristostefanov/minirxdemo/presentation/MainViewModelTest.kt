@@ -1,7 +1,8 @@
-package hristostefanov.minirxdemo
+package hristostefanov.minirxdemo.presentation
 
+import hristostefanov.minirxdemo.TIMEOUT_MS
 import hristostefanov.minirxdemo.business.interactors.*
-import hristostefanov.minirxdemo.presentation.MainViewModel
+import hristostefanov.minirxdemo.testViewModelKeepsStateOfProperty
 import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Completable
 import io.reactivex.CompletableObserver
@@ -68,7 +69,7 @@ class MainViewModelTest {
 
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
 
-        then(requestRefreshCompletable).should().subscribe(any<CompletableObserver>())
+        then(requestRefreshCompletable).should().subscribe(hristostefanov.minirxdemo.any<CompletableObserver>())
     }
 
 

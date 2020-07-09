@@ -1,11 +1,9 @@
-package hristostefanov.minirxdemo
+package hristostefanov.minirxdemo.business.interactors
 
 import hristostefanov.minirxdemo.business.entities.Post
 import hristostefanov.minirxdemo.business.entities.User
 import hristostefanov.minirxdemo.business.gateways.local.PostAndUser
 import hristostefanov.minirxdemo.business.gateways.local.PostDAO
-import hristostefanov.minirxdemo.business.interactors.ObservePosts
-import hristostefanov.minirxdemo.business.interactors.PostFace
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import org.junit.Test
