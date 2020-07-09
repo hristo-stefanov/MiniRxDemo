@@ -32,9 +32,6 @@ class ObserveBackgroundOperationStatus @Inject  constructor(
             .doFinally {
                 // empty
             }
-                // TODO should this be here??
-            // prevent disposing the trigger
-            .onErrorComplete()
     }
 }
 

@@ -18,3 +18,5 @@ fun <T> uninitialized(): T = null as T
 
 // TODO rename to WONT_HAPPEN_TIMEOUT_MS
 const val TIMEOUT_MS = 200L
+
+const val THREAD_SWITCH_TIMEOUT_MS = 100L

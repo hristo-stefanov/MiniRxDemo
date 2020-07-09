@@ -20,6 +20,9 @@ import javax.inject.Named
 abstract class ApplicationModule {
     companion object {
 
+        @Provides @Named("autoRefreshIntervalMillis")
+        fun provideAutoRefreshIntervalMillis() = 60 * 60 * 1_000L // 1h
+
         @Provides
         fun providePostDAO(db: Database): PostDAO = db.postDao()
 
