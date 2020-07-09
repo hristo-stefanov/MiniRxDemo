@@ -16,7 +16,7 @@ class ObserveBackgroundOperationStatusTest {
         val completable = Completable.error(Exception("error"))
         val observer = unit.status.test()
 
-        unit.observeStatus(completable).subscribe()
+        unit.tapInto(completable).subscribe()
 
         // the first value is InProgress
         observer.awaitCount(2).assertValueAt(1, Failure("error"))
@@ -29,7 +29,7 @@ class ObserveBackgroundOperationStatusTest {
         val completable = Completable.complete()
         val observer = unit.status.test()
 
-        unit.observeStatus(completable).subscribe()
+        unit.tapInto(completable).subscribe()
 
         // the first value is InProgress
         observer.awaitCount(2).assertValueAt(1, Success)
@@ -43,7 +43,7 @@ class ObserveBackgroundOperationStatusTest {
 
         val observer = unit.status.test()
 
-        unit.observeStatus(completable).subscribe()
+        unit.tapInto(completable).subscribe()
 
         observer.awaitCount(1).assertValueAt(0, InProgress)
         observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)

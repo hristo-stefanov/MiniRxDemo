@@ -16,8 +16,7 @@ class ObserveBackgroundOperationStatus @Inject  constructor(
     private val _statusSubject = BehaviorSubject.create<Status>()
     val status: Observable<Status> = _statusSubject
 
-    // TODO rename to tapInto
-    fun observeStatus(completable: Completable): Completable {
+    fun tapInto(completable: Completable): Completable {
         return completable
             .doOnError {
                 val msg = it.message ?: stringSupplier.get(R.string.unknown_error)

@@ -18,7 +18,7 @@ class AutoRefreshLocalDataService @Inject constructor(
         if (disposable != null)
             return
         disposable = Observable.interval(0, intervalMillis, TimeUnit.MILLISECONDS).concatMapCompletable {
-            observeBackgroundOperationStatus.observeStatus(requestRefreshLocalData.execution)
+            observeBackgroundOperationStatus.tapInto(requestRefreshLocalData.execution)
                 .onErrorComplete() // prevent disposing the source on error
         }.subscribe()
     }
