@@ -15,3 +15,6 @@ fun <T> any(): T {
 
 fun <T> eq(t: T): T = Mockito.eq<T>(t)
 fun <T> uninitialized(): T = null as T
+
+// TODO rename to WONT_HAPPEN_TIMEOUT_MS
+const val TIMEOUT_MS = 200L

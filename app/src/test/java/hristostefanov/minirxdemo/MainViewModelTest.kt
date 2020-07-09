@@ -13,8 +13,6 @@ import org.mockito.BDDMockito.*
 import org.mockito.Mockito.mock
 import java.util.concurrent.TimeUnit
 
-private const val TIMEOUT_MS = 200L
-
 class MainViewModelTest {
     private val autoRefreshLocalDataService = mock(AutoRefreshLocalDataService::class.java)
     private val observePosts = mock(ObservePosts::class.java)

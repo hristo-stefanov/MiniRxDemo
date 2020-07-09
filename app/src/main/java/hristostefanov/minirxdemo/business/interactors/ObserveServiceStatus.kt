@@ -8,6 +8,7 @@ import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
 
+// TODO class name differs from the file
 @ApplicationScope
 class ObserveBackgroundOperationStatus @Inject  constructor(
     private val stringSupplier: StringSupplier
@@ -15,6 +16,7 @@ class ObserveBackgroundOperationStatus @Inject  constructor(
     private val _statusSubject = BehaviorSubject.create<Status>()
     val status: Observable<Status> = _statusSubject
 
+    // TODO rename to tapInto
     fun observeStatus(completable: Completable): Completable {
         return completable
             .doOnError {
@@ -30,6 +32,7 @@ class ObserveBackgroundOperationStatus @Inject  constructor(
             .doFinally {
                 // empty
             }
+                // TODO should this be here??
             // prevent disposing the trigger
             .onErrorComplete()
     }
