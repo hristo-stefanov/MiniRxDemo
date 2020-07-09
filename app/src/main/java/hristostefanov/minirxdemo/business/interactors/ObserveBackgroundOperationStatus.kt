@@ -8,7 +8,6 @@ import io.reactivex.Observable
 import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
 
-// TODO class name differs from the file
 @ApplicationScope
 class ObserveBackgroundOperationStatus @Inject  constructor(
     private val stringSupplier: StringSupplier
