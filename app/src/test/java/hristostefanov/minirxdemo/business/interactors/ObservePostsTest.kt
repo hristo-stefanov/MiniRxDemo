@@ -19,7 +19,7 @@ class ObservePostsTest {
 
     // TODO is the name ok?
     @Test
-    fun `Maps @PostDAO#observePostAndUserSortedByTitleInTx emissions to @PostFace`() {
+    fun `Maps @PostDAO#observePostAndUserSortedByTitleInTx emissions to @PostSummary`() {
         val observable = Observable.concat(Observable.just(listOf(
             PostAndUser(Post(1, "title", "body",11),
                 User(11, "username"))
@@ -30,7 +30,7 @@ class ObservePostsTest {
 
         then(dao).should().observePostAndUserSortedByTitleInTx()
         observer.awaitCount(1).assertValueCount(1)
-            .assertValueAt(0, listOf(PostFace("title", "@username")))
+            .assertValueAt(0, listOf(PostSummary("title", "@username")))
     }
 
     @Test

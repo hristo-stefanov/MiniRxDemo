@@ -6,10 +6,10 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import hristostefanov.minirxdemo.R
-import hristostefanov.minirxdemo.business.interactors.PostFace
+import hristostefanov.minirxdemo.business.interactors.PostSummary
 import kotlinx.android.synthetic.main.post_list_item.view.*
 
-class PostAdapter(private val list: List<PostFace>): RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
+class PostAdapter(private val list: List<PostSummary>): RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.post_list_item, parent, false)

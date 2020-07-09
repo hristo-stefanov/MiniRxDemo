@@ -6,13 +6,13 @@ import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
 class ObservePosts @Inject constructor(private val postDAO: PostDAO) {
-    val source: Observable<List<PostFace>> by lazy {
+    val source: Observable<List<PostSummary>> by lazy {
         postDAO.observePostAndUserSortedByTitleInTx()
             .subscribeOn(Schedulers.io())
             .map { list ->
             list
                 .map {
-                    PostFace(
+                    PostSummary(
                         it.post.title,
                         "@${it.user.username}"
                     )
@@ -21,8 +21,7 @@ class ObservePosts @Inject constructor(private val postDAO: PostDAO) {
     }
 }
 
-// TODO DisplayablePost?
-data class PostFace(
+data class PostSummary(
     val title: String,
     val username: String
 )

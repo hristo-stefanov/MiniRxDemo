@@ -6,10 +6,8 @@ import hristostefanov.minirxdemo.business.interactors.*
 import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Observable
 import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import javax.inject.Inject
 
@@ -29,8 +27,8 @@ class MainViewModel @Inject constructor(
     private val _backgroundProgressIndicator = BehaviorSubject.createDefault(false)
     val backgroundProgressIndicator: Observable<Boolean> = _backgroundProgressIndicator
 
-    private val _postList = BehaviorSubject.createDefault<List<PostFace>>(emptyList())
-    val postList: Observable<List<PostFace>> = _postList
+    private val _postList = BehaviorSubject.createDefault<List<PostSummary>>(emptyList())
+    val postList: Observable<List<PostSummary>> = _postList
 
     private val _errorMessage = BehaviorSubject.createDefault("")
     val errorMessage: Observable<String> = _errorMessage

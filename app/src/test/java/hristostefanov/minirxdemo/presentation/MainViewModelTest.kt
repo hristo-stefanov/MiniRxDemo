@@ -38,7 +38,7 @@ class MainViewModelTest {
     }
 
     // test data
-    private val post1 = PostFace("Title", "body")
+    private val post1 = PostSummary("Title", "body")
 
     @Before
     fun beforeAll() {
