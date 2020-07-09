@@ -1,6 +1,6 @@
 package hristostefanov.minirxdemo.business.interactors
 
-import hristostefanov.minirxdemo.TIMEOUT_MS
+import hristostefanov.minirxdemo.WONT_HAPPEN_TIMEOUT_MS
 import hristostefanov.minirxdemo.utilities.StringSupplier
 import io.reactivex.Completable
 import org.junit.Test
@@ -20,7 +20,7 @@ class ObserveBackgroundOperationStatusTest {
 
         // the first value is InProgress
         observer.awaitCount(2).assertValueAt(1, Failure("error"))
-        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 
@@ -33,7 +33,7 @@ class ObserveBackgroundOperationStatusTest {
 
         // the first value is InProgress
         observer.awaitCount(2).assertValueAt(1, Success)
-        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 
@@ -46,7 +46,7 @@ class ObserveBackgroundOperationStatusTest {
         unit.observeStatus(completable).subscribe()
 
         observer.awaitCount(1).assertValueAt(0, InProgress)
-        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 }

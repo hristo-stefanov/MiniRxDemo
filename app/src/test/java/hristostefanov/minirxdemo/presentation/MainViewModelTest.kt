@@ -1,6 +1,6 @@
 package hristostefanov.minirxdemo.presentation
 
-import hristostefanov.minirxdemo.TIMEOUT_MS
+import hristostefanov.minirxdemo.WONT_HAPPEN_TIMEOUT_MS
 import hristostefanov.minirxdemo.business.interactors.*
 import hristostefanov.minirxdemo.testViewModelKeepsStateOfProperty
 import hristostefanov.minirxdemo.utilities.StringSupplier
@@ -86,7 +86,7 @@ class MainViewModelTest {
         // expecting default value + payload
         observer.awaitCount(2)
             .assertValueCount(2) // awaitCount may fail with time-out hence the assert
-        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 
@@ -130,7 +130,7 @@ class MainViewModelTest {
         // expecting the default value + payload
         observer.awaitCount(2).assertValueAt(1, listOf(formattedPost1))
 
-        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 
@@ -146,7 +146,7 @@ class MainViewModelTest {
         // wait the default value, one empty string and the payload
         observer.awaitCount(3).assertValueAt(2, "error")
 
-        observer.awaitTerminalEvent(TIMEOUT_MS, TimeUnit.MILLISECONDS)
+        observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 
