@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
             compositeDisposable.add(it)
         }
 
-        viewModel.backgroundProgressIndicator.observeOn(AndroidSchedulers.mainThread()).subscribe {
+        viewModel.progressIndicator.observeOn(AndroidSchedulers.mainThread()).subscribe {
             if (it) {
                 progressBar.show()
             } else {

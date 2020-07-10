@@ -23,8 +23,8 @@ class MainViewModel @Inject constructor(
     private val _refreshIndicator = BehaviorSubject.createDefault(false)
     val refreshIndicator: Observable<Boolean> = _refreshIndicator
 
-    private val _backgroundProgressIndicator = BehaviorSubject.createDefault(false)
-    val backgroundProgressIndicator: Observable<Boolean> = _backgroundProgressIndicator
+    private val _progressIndicator = BehaviorSubject.createDefault(false)
+    val progressIndicator: Observable<Boolean> = _progressIndicator
 
     private val _postList = BehaviorSubject.createDefault<List<FormattedPostSummary>>(emptyList())
     val postList: Observable<List<FormattedPostSummary>> = _postList
@@ -57,14 +57,14 @@ class MainViewModel @Inject constructor(
             when (it) {
                 is Failure -> {
                     _errorMessage.onNext(it.message)
-                    _backgroundProgressIndicator.onNext(false)
+                    _progressIndicator.onNext(false)
                 }
                 is Success -> {
-                    _backgroundProgressIndicator.onNext(false)
+                    _progressIndicator.onNext(false)
                     _errorMessage.onNext("")
                 }
                 is InProgress -> {
-                    _backgroundProgressIndicator.onNext(true)
+                    _progressIndicator.onNext(true)
                     _errorMessage.onNext("")
                 }
             }

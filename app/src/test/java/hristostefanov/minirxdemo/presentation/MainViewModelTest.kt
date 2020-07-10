@@ -180,7 +180,7 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Sets #backgroundProgressIndicator when @AutoRefreshService#status reports "InProgress"`() {
+    fun `Sets #progressIndicator when @AutoRefreshService#status reports "InProgress"`() {
         given(autoRefreshService.status).willReturn(
             Observable.concat(
                 Observable.just(
@@ -188,7 +188,7 @@ class MainViewModelTest {
                 ), Observable.never()
             )
         )
-        val observer = viewModelUnderTest.backgroundProgressIndicator.test()
+        val observer = viewModelUnderTest.progressIndicator.test()
 
         viewModelUnderTest.init()
 
@@ -197,10 +197,10 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #backgroundProgressIndicator when @AutoRefreshService#status reports "Success"`() {
+    fun `Clears #progressIndicator when @AutoRefreshService#status reports "Success"`() {
         val statusSubject = PublishSubject.create<Status>()
         given(autoRefreshService.status).willReturn(statusSubject)
-        val observer = viewModelUnderTest.backgroundProgressIndicator.test()
+        val observer = viewModelUnderTest.progressIndicator.test()
         viewModelUnderTest.init()
         statusSubject.onNext(InProgress)
         // await two values - the default and true
@@ -212,10 +212,10 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #backgroundProgressIndicator when @AutoRefreshService#status reports "Failure"`() {
+    fun `Clears #progressIndicator when @AutoRefreshService#status reports "Failure"`() {
         val statusSubject = PublishSubject.create<Status>()
         given(autoRefreshService.status).willReturn(statusSubject)
-        val observer = viewModelUnderTest.backgroundProgressIndicator.test()
+        val observer = viewModelUnderTest.progressIndicator.test()
         viewModelUnderTest.init()
         statusSubject.onNext(InProgress)
         // await two values - the default and true
