@@ -21,17 +21,17 @@ class AutoRefreshLocalDataServiceTest {
 
     private val observeBackgroundOperationStatus =
         spy(ObserveBackgroundOperationStatus(stringSupplier))
-    private val requestRefreshLocalData = mock(RequestRefreshLocalData::class.java)
+    private val refreshInteractor = mock(RefreshInteractor::class.java)
 
     private val unit =
         AutoRefreshLocalDataService(
-            observeBackgroundOperationStatus, requestRefreshLocalData,
+            observeBackgroundOperationStatus, refreshInteractor,
             INTERVAL_MILLIS
         )
 
     @Before
     fun beforeEach() {
-        given(requestRefreshLocalData.execution).willReturn(completable)
+        given(refreshInteractor.execution).willReturn(completable)
     }
 
     @Test

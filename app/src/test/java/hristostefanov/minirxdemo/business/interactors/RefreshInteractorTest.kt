@@ -16,7 +16,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 import java.util.concurrent.Executor
 
-class RequestRefreshLocalDataTest {
+class RefreshInteractorTest {
 
     private val userDAO = mock(UserDAO::class.java)
     private val postDAO = mock(PostDAO::class.java)
@@ -25,8 +25,8 @@ class RequestRefreshLocalDataTest {
         it.run()
     })
 
-    private val unit: RequestRefreshLocalData by lazy {
-        RequestRefreshLocalData(service, userDAO, postDAO, txExecutor)
+    private val unit: RefreshInteractor by lazy {
+        RefreshInteractor(service, userDAO, postDAO, txExecutor)
     }
 
     @Test

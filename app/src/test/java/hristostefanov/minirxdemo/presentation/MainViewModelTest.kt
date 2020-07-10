@@ -17,11 +17,11 @@ import java.util.concurrent.TimeUnit
 class MainViewModelTest {
     private val autoRefreshLocalDataService = mock(AutoRefreshLocalDataService::class.java)
     private val observePosts = mock(ObservePosts::class.java)
-    private val requestRefreshLocalData = mock(RequestRefreshLocalData::class.java)
+    private val refreshInteractor = mock(RefreshInteractor::class.java)
     private val observeBackgroundOperationStatus =
         mock(ObserveBackgroundOperationStatus::class.java)
 
-    private val requestRefreshCompletable = spy(Completable.complete())
+    private val refreshCompletable = spy(Completable.complete())
 
     private val stringSupplier = object : StringSupplier {
         override fun get(resId: Int): String = "Unknown error"
@@ -30,7 +30,7 @@ class MainViewModelTest {
     private val viewModelUnderTest: MainViewModel by lazy {
         MainViewModel(
             observePosts,
-            requestRefreshLocalData,
+            refreshInteractor,
             stringSupplier,
             observeBackgroundOperationStatus,
             autoRefreshLocalDataService
@@ -45,7 +45,7 @@ class MainViewModelTest {
     fun beforeAll() {
         given(observeBackgroundOperationStatus.status).willReturn(Observable.never())
         given(observePosts.source).willReturn(Observable.never())
-        given(requestRefreshLocalData.execution).willReturn(requestRefreshCompletable)
+        given(refreshInteractor.execution).willReturn(refreshCompletable)
     }
 
     @Test
@@ -65,12 +65,12 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Executes @RequestRefreshLocalData on Refresh command`() {
+    fun `Executes @RefreshInteractor on Refresh command`() {
         viewModelUnderTest.init()
 
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
 
-        then(requestRefreshCompletable).should().subscribe(hristostefanov.minirxdemo.any<CompletableObserver>())
+        then(refreshCompletable).should().subscribe(hristostefanov.minirxdemo.any<CompletableObserver>())
     }
 
 
@@ -135,9 +135,9 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Routes @RequestRefreshLocalData errors to #errorMessage without terminating it`() {
+    fun `Routes @RefreshInteractor errors to #errorMessage without terminating it`() {
         val errorCompletable = Completable.error(Throwable("error"))
-        given(requestRefreshLocalData.execution).willReturn(errorCompletable)
+        given(refreshInteractor.execution).willReturn(errorCompletable)
         val observer = viewModelUnderTest.errorMessage.test()
         viewModelUnderTest.init()
 
@@ -163,9 +163,9 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #foregroundProgressIndicator when @RequestRefreshLocalData execution completes`() {
+    fun `Clears #foregroundProgressIndicator when @RefreshInteractor execution completes`() {
         val executionSubject = PublishSubject.create<Unit>()
-        given(requestRefreshLocalData.execution).willReturn(
+        given(refreshInteractor.execution).willReturn(
             Completable.fromObservable(
                 executionSubject
             )

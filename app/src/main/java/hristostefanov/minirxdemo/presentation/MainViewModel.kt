@@ -14,13 +14,14 @@ import javax.inject.Inject
 @Suppress("UnstableApiUsage")
 class MainViewModel @Inject constructor(
     private val observePosts: ObservePosts,
-    private val requestRefreshLocalData: RequestRefreshLocalData,
+    private val refreshInteractor: RefreshInteractor,
     private val stringSupplier: StringSupplier,
     private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus,
     private val autoRefreshLocalDataService: AutoRefreshLocalDataService
 ) :
     ViewModel() {
 
+    // TODO rename to refreshIndicator
     private val _foregroundProgressIndicator = BehaviorSubject.createDefault(false)
     val foregroundProgressIndicator: Observable<Boolean> = _foregroundProgressIndicator
 
@@ -41,7 +42,7 @@ class MainViewModel @Inject constructor(
     fun init() {
         // using concatMap to auto-dispose the mapped completable when this VM is cleared
         _refreshCommandSubject.concatMapCompletable {
-            requestRefreshLocalData.execution.doOnSubscribe {
+            refreshInteractor.execution.doOnSubscribe {
                 _errorMessage.onNext("")
                 _foregroundProgressIndicator.onNext(true)
             }.doOnError {
