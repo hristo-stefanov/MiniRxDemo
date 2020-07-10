@@ -3,7 +3,10 @@ package hristostefanov.minirxdemo.presentation
 import androidx.lifecycle.ViewModel
 import hristostefanov.minirxdemo.R
 import hristostefanov.minirxdemo.business.interactors.*
+import hristostefanov.minirxdemo.utilities.Failure
+import hristostefanov.minirxdemo.utilities.InProgress
 import hristostefanov.minirxdemo.utilities.StringSupplier
+import hristostefanov.minirxdemo.utilities.Success
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.CompositeDisposable

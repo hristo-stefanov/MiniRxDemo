@@ -3,7 +3,7 @@ package hristostefanov.minirxdemo.presentation
 import hristostefanov.minirxdemo.WONT_HAPPEN_TIMEOUT_MS
 import hristostefanov.minirxdemo.business.interactors.*
 import hristostefanov.minirxdemo.testViewModelKeepsStateOfProperty
-import hristostefanov.minirxdemo.utilities.StringSupplier
+import hristostefanov.minirxdemo.utilities.*
 import io.reactivex.Completable
 import io.reactivex.CompletableObserver
 import io.reactivex.Observable
@@ -74,7 +74,9 @@ class MainViewModelTest {
     @Test
     fun `Routes @AutoRefreshService#Status Failures to #errorMessage without terminating it`() {
         val errorInfiniteObservable =
-            Observable.concat<Status>(Observable.just(Failure("error")), Observable.never())
+            Observable.concat<Status>(Observable.just(
+                Failure("error")
+            ), Observable.never())
         given(autoRefreshService.status).willReturn(errorInfiniteObservable)
 
         val observer = viewModelUnderTest.errorMessage.test()
@@ -105,7 +107,9 @@ class MainViewModelTest {
     @Test
     fun `Keeps #errorMessage state`() {
         val sourceObservableSpy =
-            spy(Observable.concat<Status>(Observable.just(Failure("error")), Observable.never()))
+            spy(Observable.concat<Status>(Observable.just(
+                Failure("error")
+            ), Observable.never()))
         given(autoRefreshService.status).willReturn(sourceObservableSpy)
 
         testViewModelKeepsStateOfProperty(
