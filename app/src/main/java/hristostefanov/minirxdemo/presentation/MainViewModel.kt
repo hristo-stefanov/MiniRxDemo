@@ -17,7 +17,7 @@ class MainViewModel @Inject constructor(
     private val refreshInteractor: RefreshInteractor,
     private val stringSupplier: StringSupplier,
     private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus,
-    private val autoRefreshLocalDataService: AutoRefreshLocalDataService
+    private val autoRefreshService: AutoRefreshService
 ) :
     ViewModel() {
 
@@ -90,11 +90,11 @@ class MainViewModel @Inject constructor(
                 compositeDisposable.add(it)
             }
 
-        autoRefreshLocalDataService.start()
+        autoRefreshService.start()
     }
 
     public override fun onCleared() {
-        autoRefreshLocalDataService.stop()
+        autoRefreshService.stop()
         // calling #dispose instead of #clear because the container will not be reused
         compositeDisposable.dispose()
         super.onCleared()

@@ -15,7 +15,7 @@ import org.mockito.Mockito.mock
 import java.util.concurrent.TimeUnit
 
 class MainViewModelTest {
-    private val autoRefreshLocalDataService = mock(AutoRefreshLocalDataService::class.java)
+    private val autoRefreshService = mock(AutoRefreshService::class.java)
     private val observePosts = mock(ObservePosts::class.java)
     private val refreshInteractor = mock(RefreshInteractor::class.java)
     private val observeBackgroundOperationStatus =
@@ -33,7 +33,7 @@ class MainViewModelTest {
             refreshInteractor,
             stringSupplier,
             observeBackgroundOperationStatus,
-            autoRefreshLocalDataService
+            autoRefreshService
         )
     }
 
@@ -49,19 +49,19 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Starts @AutoRefreshLocalDataService when initialized`() {
+    fun `Starts @AutoRefreshService when initialized`() {
         viewModelUnderTest.init()
 
-        then(autoRefreshLocalDataService).should().start()
+        then(autoRefreshService).should().start()
     }
 
     @Test
-    fun `Stops @AutoRefreshLocalDataService when cleared`() {
+    fun `Stops @AutoRefreshService when cleared`() {
         viewModelUnderTest.init()
 
         viewModelUnderTest.onCleared()
 
-        then(autoRefreshLocalDataService).should().stop()
+        then(autoRefreshService).should().stop()
     }
 
     @Test

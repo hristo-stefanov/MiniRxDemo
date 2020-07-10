@@ -12,7 +12,7 @@ import java.lang.Thread.sleep
 
 private const val INTERVAL_MILLIS = THREAD_SWITCH_TIMEOUT_MS * 3
 
-class AutoRefreshLocalDataServiceTest {
+class AutoRefreshServiceTest {
 
     private val completable = spy(Completable.complete())
     private val stringSupplier = object : StringSupplier {
@@ -24,7 +24,7 @@ class AutoRefreshLocalDataServiceTest {
     private val refreshInteractor = mock(RefreshInteractor::class.java)
 
     private val unit =
-        AutoRefreshLocalDataService(
+        AutoRefreshService(
             observeBackgroundOperationStatus, refreshInteractor,
             INTERVAL_MILLIS
         )

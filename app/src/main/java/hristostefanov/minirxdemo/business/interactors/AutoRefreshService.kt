@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Named
 
-class AutoRefreshLocalDataService @Inject constructor(
+class AutoRefreshService @Inject constructor(
     private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus,
     private val refreshInteractor: RefreshInteractor,
     @Named("autoRefreshIntervalMillis")
