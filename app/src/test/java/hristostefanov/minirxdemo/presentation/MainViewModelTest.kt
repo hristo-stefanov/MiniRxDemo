@@ -18,8 +18,6 @@ class MainViewModelTest {
     private val autoRefreshService = mock(AutoRefreshService::class.java)
     private val observePostsInteractor = mock(ObservePostsInteractor::class.java)
     private val refreshInteractor = mock(RefreshInteractor::class.java)
-    private val observeBackgroundOperationStatus =
-        mock(ObserveBackgroundOperationStatus::class.java)
 
     private val refreshCompletable = spy(Completable.complete())
 
@@ -32,7 +30,6 @@ class MainViewModelTest {
             observePostsInteractor,
             refreshInteractor,
             stringSupplier,
-            observeBackgroundOperationStatus,
             autoRefreshService
         )
     }
@@ -43,7 +40,7 @@ class MainViewModelTest {
 
     @Before
     fun beforeAll() {
-        given(observeBackgroundOperationStatus.status).willReturn(Observable.never())
+        given(autoRefreshService.status).willReturn(Observable.never())
         given(observePostsInteractor.source).willReturn(Observable.never())
         given(refreshInteractor.execution).willReturn(refreshCompletable)
     }
@@ -75,10 +72,10 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Routes @ObserveBackgroundOperationStatus Failures to #errorMessage without terminating it`() {
+    fun `Routes @AutoRefreshService#Status Failures to #errorMessage without terminating it`() {
         val errorInfiniteObservable =
             Observable.concat<Status>(Observable.just(Failure("error")), Observable.never())
-        given(observeBackgroundOperationStatus.status).willReturn(errorInfiniteObservable)
+        given(autoRefreshService.status).willReturn(errorInfiniteObservable)
 
         val observer = viewModelUnderTest.errorMessage.test()
         viewModelUnderTest.init()
@@ -109,7 +106,7 @@ class MainViewModelTest {
     fun `Keeps #errorMessage state`() {
         val sourceObservableSpy =
             spy(Observable.concat<Status>(Observable.just(Failure("error")), Observable.never()))
-        given(observeBackgroundOperationStatus.status).willReturn(sourceObservableSpy)
+        given(autoRefreshService.status).willReturn(sourceObservableSpy)
 
         testViewModelKeepsStateOfProperty(
             sourceObservableSpy,
@@ -183,8 +180,8 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Sets #backgroundProgressIndicator when @ObserveBackgroundOperationStatus reports "InProgress"`() {
-        given(observeBackgroundOperationStatus.status).willReturn(
+    fun `Sets #backgroundProgressIndicator when @AutoRefreshService#status reports "InProgress"`() {
+        given(autoRefreshService.status).willReturn(
             Observable.concat(
                 Observable.just(
                     InProgress
@@ -200,9 +197,9 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #backgroundProgressIndicator when @ObserveBackgroundOperationStatus reports "Success"`() {
+    fun `Clears #backgroundProgressIndicator when @AutoRefreshService#status reports "Success"`() {
         val statusSubject = PublishSubject.create<Status>()
-        given(observeBackgroundOperationStatus.status).willReturn(statusSubject)
+        given(autoRefreshService.status).willReturn(statusSubject)
         val observer = viewModelUnderTest.backgroundProgressIndicator.test()
         viewModelUnderTest.init()
         statusSubject.onNext(InProgress)
@@ -215,9 +212,9 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #backgroundProgressIndicator when @ObserveBackgroundOperationStatus reports "Failure"`() {
+    fun `Clears #backgroundProgressIndicator when @AutoRefreshService#status reports "Failure"`() {
         val statusSubject = PublishSubject.create<Status>()
-        given(observeBackgroundOperationStatus.status).willReturn(statusSubject)
+        given(autoRefreshService.status).willReturn(statusSubject)
         val observer = viewModelUnderTest.backgroundProgressIndicator.test()
         viewModelUnderTest.init()
         statusSubject.onNext(InProgress)

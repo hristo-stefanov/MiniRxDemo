@@ -16,7 +16,6 @@ class MainViewModel @Inject constructor(
     private val observePostsInteractor: ObservePostsInteractor,
     private val refreshInteractor: RefreshInteractor,
     private val stringSupplier: StringSupplier,
-    private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus,
     private val autoRefreshService: AutoRefreshService
 ) :
     ViewModel() {
@@ -55,7 +54,7 @@ class MainViewModel @Inject constructor(
             compositeDisposable.add(it)
         }
 
-        observeBackgroundOperationStatus.status.subscribe {
+        autoRefreshService.status.subscribe {
             when (it) {
                 is Failure -> {
                     _errorMessage.onNext(it.message)
