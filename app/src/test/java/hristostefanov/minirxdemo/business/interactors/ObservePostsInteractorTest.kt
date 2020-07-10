@@ -13,9 +13,9 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
 
 
-class ObservePostsTest {
+class ObservePostsInteractorTest {
     private val dao = mock(PostDAO::class.java)
-    private val unit = ObservePosts(dao)
+    private val unit = ObservePostsInteractor(dao)
 
     // TODO is the name ok?
     @Test

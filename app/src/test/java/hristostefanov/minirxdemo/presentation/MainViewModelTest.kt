@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 
 class MainViewModelTest {
     private val autoRefreshService = mock(AutoRefreshService::class.java)
-    private val observePosts = mock(ObservePosts::class.java)
+    private val observePostsInteractor = mock(ObservePostsInteractor::class.java)
     private val refreshInteractor = mock(RefreshInteractor::class.java)
     private val observeBackgroundOperationStatus =
         mock(ObserveBackgroundOperationStatus::class.java)
@@ -29,7 +29,7 @@ class MainViewModelTest {
 
     private val viewModelUnderTest: MainViewModel by lazy {
         MainViewModel(
-            observePosts,
+            observePostsInteractor,
             refreshInteractor,
             stringSupplier,
             observeBackgroundOperationStatus,
@@ -44,7 +44,7 @@ class MainViewModelTest {
     @Before
     fun beforeAll() {
         given(observeBackgroundOperationStatus.status).willReturn(Observable.never())
-        given(observePosts.source).willReturn(Observable.never())
+        given(observePostsInteractor.source).willReturn(Observable.never())
         given(refreshInteractor.execution).willReturn(refreshCompletable)
     }
 
@@ -95,7 +95,7 @@ class MainViewModelTest {
     fun `Keeps #postList state`() {
         val listPostsObservableSpy =
             spy(Observable.concat(Observable.just(listOf(post1)), Observable.never()))
-        given(observePosts.source).willReturn(listPostsObservableSpy)
+        given(observePostsInteractor.source).willReturn(listPostsObservableSpy)
 
         testViewModelKeepsStateOfProperty(
             listPostsObservableSpy,
@@ -119,10 +119,10 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Routes and formats @ObservePosts emissions to #postList without terminating it`() {
+    fun `Routes and formats @ObservePostsInteractor emissions to #postList without terminating it`() {
         val listPostsObservable =
             Observable.concat(Observable.just(listOf(post1)), Observable.never())
-        given(observePosts.source).willReturn(listPostsObservable)
+        given(observePostsInteractor.source).willReturn(listPostsObservable)
 
         val observer = viewModelUnderTest.postList.test()
         viewModelUnderTest.init()

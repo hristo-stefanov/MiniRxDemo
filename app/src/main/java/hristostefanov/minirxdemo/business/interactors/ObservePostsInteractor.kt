@@ -5,7 +5,7 @@ import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class ObservePosts @Inject constructor(private val postDAO: PostDAO) {
+class ObservePostsInteractor @Inject constructor(private val postDAO: PostDAO) {
     val source: Observable<List<PostSummary>> by lazy {
         postDAO.observePostAndUserSortedByTitleInTx()
             .subscribeOn(Schedulers.io())

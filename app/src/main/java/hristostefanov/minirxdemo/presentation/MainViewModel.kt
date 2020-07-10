@@ -13,7 +13,7 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 class MainViewModel @Inject constructor(
-    private val observePosts: ObservePosts,
+    private val observePostsInteractor: ObservePostsInteractor,
     private val refreshInteractor: RefreshInteractor,
     private val stringSupplier: StringSupplier,
     private val observeBackgroundOperationStatus: ObserveBackgroundOperationStatus,
@@ -74,7 +74,7 @@ class MainViewModel @Inject constructor(
             compositeDisposable.add(it)
         }
 
-        observePosts.source
+        observePostsInteractor.source
             .subscribe(
                 { list ->
                     val formattedList = list.map {
