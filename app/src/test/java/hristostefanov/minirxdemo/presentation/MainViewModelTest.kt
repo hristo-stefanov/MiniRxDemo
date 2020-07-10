@@ -149,8 +149,8 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Sets #foregroundProgressIndicator when starts executing Refresh command`() {
-        val observer = viewModelUnderTest.foregroundProgressIndicator.test()
+    fun `Sets #refreshIndicator when starts executing Refresh command`() {
+        val observer = viewModelUnderTest.refreshIndicator.test()
         viewModelUnderTest.init()
 
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
@@ -160,14 +160,14 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #foregroundProgressIndicator when @RefreshInteractor execution completes`() {
+    fun `Clears #refreshIndicator when @RefreshInteractor execution completes`() {
         val executionSubject = PublishSubject.create<Unit>()
         given(refreshInteractor.execution).willReturn(
             Completable.fromObservable(
                 executionSubject
             )
         )
-        val observer = viewModelUnderTest.foregroundProgressIndicator.test()
+        val observer = viewModelUnderTest.refreshIndicator.test()
         viewModelUnderTest.init()
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
         // await two values - the default and true

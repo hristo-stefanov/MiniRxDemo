@@ -20,9 +20,8 @@ class MainViewModel @Inject constructor(
 ) :
     ViewModel() {
 
-    // TODO rename to refreshIndicator
-    private val _foregroundProgressIndicator = BehaviorSubject.createDefault(false)
-    val foregroundProgressIndicator: Observable<Boolean> = _foregroundProgressIndicator
+    private val _refreshIndicator = BehaviorSubject.createDefault(false)
+    val refreshIndicator: Observable<Boolean> = _refreshIndicator
 
     private val _backgroundProgressIndicator = BehaviorSubject.createDefault(false)
     val backgroundProgressIndicator: Observable<Boolean> = _backgroundProgressIndicator
@@ -43,12 +42,12 @@ class MainViewModel @Inject constructor(
         _refreshCommandSubject.concatMapCompletable {
             refreshInteractor.execution.doOnSubscribe {
                 _errorMessage.onNext("")
-                _foregroundProgressIndicator.onNext(true)
+                _refreshIndicator.onNext(true)
             }.doOnError {
                 val msg = it.message ?: stringSupplier.get(R.string.unknown_error)
                 _errorMessage.onNext(msg)
             }.doFinally {
-                _foregroundProgressIndicator.onNext(false)
+                _refreshIndicator.onNext(false)
             }.onErrorComplete() // prevent disposing the source on error
         }.subscribe().also {
             compositeDisposable.add(it)

@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
     override fun onStart() {
         super.onStart()
 
-        viewModel.foregroundProgressIndicator.observeOn(AndroidSchedulers.mainThread()).subscribe {
+        viewModel.refreshIndicator.observeOn(AndroidSchedulers.mainThread()).subscribe {
             swipeRefreshLayout.isRefreshing = it
         }.also {
             compositeDisposable.add(it)
