@@ -1,6 +1,5 @@
 package hristostefanov.minirxdemo.presentation
 
-data class PostFace(
+data class FormattedPostSummary(
     val title: String,
-    val username: String
-)
+    val username: String)

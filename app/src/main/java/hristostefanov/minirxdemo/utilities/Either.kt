@@ -1,4 +1,4 @@
-package hristostefanov.minirxdemo.util
+package hristostefanov.minirxdemo.utilities
 
 sealed class Either<out A, out B> {
     class Left<A>(val value: A): Either<A, Nothing>()

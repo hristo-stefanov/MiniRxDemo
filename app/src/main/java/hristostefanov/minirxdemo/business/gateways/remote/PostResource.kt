@@ -1,12 +1,11 @@
-package hristostefanov.minirxdemo.remote
+package hristostefanov.minirxdemo.business.gateways.remote
 
 import com.google.gson.annotations.SerializedName
-
-data class PostDTO(
-    @SerializedName("userId")
-    val userId: Int,
+data class PostResource(
     @SerializedName("id")
     val id: Int,
+    @SerializedName("userId")
+    val userId: Int,
     @SerializedName("title")
     val title: String,
     @SerializedName("body")

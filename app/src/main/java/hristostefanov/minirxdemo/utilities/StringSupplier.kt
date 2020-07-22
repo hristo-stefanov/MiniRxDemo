@@ -1,4 +1,4 @@
-package hristostefanov.minirxdemo.util
+package hristostefanov.minirxdemo.utilities
 
 import androidx.annotation.StringRes
 
