@@ -5,7 +5,7 @@ import android.view.View
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.jakewharton.rxbinding3.view.clicks
+import com.jakewharton.rxbinding3.swiperefreshlayout.refreshes
 import hristostefanov.minirxdemo.App
 import hristostefanov.minirxdemo.R
 import hristostefanov.minirxdemo.presentation.MainViewModel
@@ -14,6 +14,7 @@ import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.main_activity.*
 
 class MainActivity : AppCompatActivity() {
+
     private val viewModel: MainViewModel by viewModels {
         ViewModelFactory((application as App).component)
     }
@@ -26,24 +27,47 @@ class MainActivity : AppCompatActivity() {
 
         recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
 
-        refreshButton.clicks().subscribe(viewModel.refreshObserver)
+        swipeRefreshLayout.refreshes().subscribe(viewModel.refreshCommandObserver)
     }
 
     override fun onStart() {
         super.onStart()
 
-        compositeDisposable.add(viewModel.errorMessage.observeOn(AndroidSchedulers.mainThread()).subscribe{
+        viewModel.refreshIndicator.observeOn(AndroidSchedulers.mainThread()).subscribe {
+            swipeRefreshLayout.isRefreshing = it
+        }.also {
+            compositeDisposable.add(it)
+        }
+
+        viewModel.progressIndicator.observeOn(AndroidSchedulers.mainThread()).subscribe {
+            if (it) {
+                progressBar.show()
+            } else {
+                progressBar.hide()
+            }
+        }.also {
+            compositeDisposable.add(it)
+        }
+
+        viewModel.errorMessage.observeOn(AndroidSchedulers.mainThread()).subscribe{
             messageTextView.text = it
             messageTextView.visibility = if (it.isBlank()) View.GONE else View.VISIBLE
-        })
+        }.also {
+            compositeDisposable.add(it)
+        }
 
-        compositeDisposable.add(viewModel.postList.observeOn(AndroidSchedulers.mainThread()).subscribe {
+        viewModel.postList.observeOn(AndroidSchedulers.mainThread()).subscribe {
             recyclerView.adapter = PostAdapter(it)
-        })
+        }.also {
+            compositeDisposable.add(it)
+        }
     }
 
     override fun onStop() {
-        compositeDisposable.dispose()
+        // Note: using #clear clear because the container will be reused between start-stop-start
+        // transitions
+        compositeDisposable.clear()
+
         super.onStop()
     }
 }

@@ -5,10 +5,11 @@ Author: Hristo M. Stefanov
 This Android app is a demo and is not intended for actual use. It demos
 using RxJava in all layers of the app.
 
-The only screen of the app lists the 10 first posts from the fake JSONPlaceholder API. In
-order to display the username along each post, request chaining is used.
-
-Refreshing the list of posts from the remote data source is demonstrated too.
+## Features
+* Displays a list of mock posts from the JSONPlaceholder API 
+* Offline mode (with a local DB)
+* Auto-refreshes local data
+* Swipe-to-refresh gesture refreshes local data
 
 ## Opening the project in Android Studio
 

@@ -1,23 +1,46 @@
-package hristostefanov.minirxdemo.util
+package hristostefanov.minirxdemo.utilities.di
 
 import android.app.Application
-import dagger.Binds
+import androidx.room.Room
 import dagger.Module
 import dagger.Provides
 import hristostefanov.minirxdemo.BuildConfig
-import hristostefanov.minirxdemo.business.DataSource
-import hristostefanov.minirxdemo.remote.RemoteDataSource
-import hristostefanov.minirxdemo.remote.Service
+import hristostefanov.minirxdemo.utilities.db.Database
+import hristostefanov.minirxdemo.business.gateways.local.PostDAO
+import hristostefanov.minirxdemo.business.gateways.local.UserDAO
+import hristostefanov.minirxdemo.business.gateways.remote.Service
+import hristostefanov.minirxdemo.utilities.StringSupplier
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.Executor
+import javax.inject.Named
 
 @Module
 abstract class ApplicationModule {
-    @Binds
-    abstract fun bindDataSource(dataSource: RemoteDataSource): DataSource
-
     companion object {
+
+        @Provides @Named("autoRefreshIntervalMillis")
+        fun provideAutoRefreshIntervalMillis() = 60 * 60 * 1_000L // 1h
+
+        @Provides
+        fun providePostDAO(db: Database): PostDAO = db.postDao()
+
+        @Provides
+        fun provideUserDAO(db: Database): UserDAO = db.userDao()
+
+
+        @Provides @Named("transactionExecutor")
+        fun transactionExecutor(db: Database): Executor = Executor { command ->
+            db.runInTransaction(command)
+        }
+
+        @ApplicationScope
+        @Provides
+        fun provideDatabase(app: Application): Database {
+            return Room.databaseBuilder(app.applicationContext, Database::class.java, "db").build()
+        }
+
         @ApplicationScope
         @Provides
         fun provideRetrofit(): Retrofit {
