@@ -32,7 +32,7 @@ class AutoRefreshServiceTest {
     }
 
     @Test
-    fun `Executes Refresh when started`() {
+    fun `Refreshes local data when started`() {
         unit.start()
 
         then(executionCompletable).should(timeout(THREAD_SWITCH_TIMEOUT_MS))
@@ -40,7 +40,7 @@ class AutoRefreshServiceTest {
     }
 
     @Test
-    fun `Executes Refresh periodically`() {
+    fun `Refreshes local data periodically`() {
         unit.start()
 
         sleep(INTERVAL_MILLIS)

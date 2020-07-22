@@ -1,7 +1,10 @@
 package hristostefanov.minirxdemo.presentation
 
 import hristostefanov.minirxdemo.WONT_HAPPEN_TIMEOUT_MS
-import hristostefanov.minirxdemo.business.interactors.*
+import hristostefanov.minirxdemo.business.interactors.AutoRefreshService
+import hristostefanov.minirxdemo.business.interactors.ObservePostsInteractor
+import hristostefanov.minirxdemo.business.interactors.PostSummary
+import hristostefanov.minirxdemo.business.interactors.RefreshInteractor
 import hristostefanov.minirxdemo.testViewModelKeepsStateOfProperty
 import hristostefanov.minirxdemo.utilities.*
 import io.reactivex.Completable
@@ -36,7 +39,7 @@ class MainViewModelTest {
 
     // test data
     private val post1 = PostSummary("Title", "username")
-    val formattedPost1 = FormattedPostSummary("Title", "@username")
+    private val formattedPost1 = FormattedPostSummary("Title", "@username")
 
     @Before
     fun beforeAll() {
@@ -46,14 +49,14 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Starts @AutoRefreshService when initialized`() {
+    fun `Starts auto-refreshing local data when initialized`() {
         viewModelUnderTest.init()
 
         then(autoRefreshService).should().start()
     }
 
     @Test
-    fun `Stops @AutoRefreshService when cleared`() {
+    fun `Stops auto-refreshing local data when cleared`() {
         viewModelUnderTest.init()
 
         viewModelUnderTest.onCleared()
@@ -62,7 +65,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Executes @RefreshInteractor on Refresh command`() {
+    fun `Executes Refresh command when requested`() {
         viewModelUnderTest.init()
 
         viewModelUnderTest.refreshCommandObserver.onNext(Unit)
@@ -72,7 +75,7 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Routes @AutoRefreshService#Status Failures to #errorMessage without terminating it`() {
+    fun `Displays error message on each auto-refresh service failure`() {
         val errorInfiniteObservable =
             Observable.concat<Status>(Observable.just(
                 Failure("error")
@@ -85,13 +88,14 @@ class MainViewModelTest {
         // expecting default value + payload
         observer.awaitCount(2)
             .assertValueCount(2) // awaitCount may fail with time-out hence the assert
+        // not terminated
         observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 
 
     @Test
-    fun `Keeps #postList state`() {
+    fun `Keeps post list state`() {
         val listPostsObservableSpy =
             spy(Observable.concat(Observable.just(listOf(post1)), Observable.never()))
         given(observePostsInteractor.source).willReturn(listPostsObservableSpy)
@@ -105,7 +109,7 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Keeps #errorMessage state`() {
+    fun `Keeps error message state`() {
         val sourceObservableSpy =
             spy(Observable.concat<Status>(Observable.just(
                 Failure("error")
@@ -119,8 +123,9 @@ class MainViewModelTest {
         )
     }
 
+
     @Test
-    fun `Routes and formats @ObservePostsInteractor emissions to #postList without terminating it`() {
+    fun `Displays each post list emission`() {
         val listPostsObservable =
             Observable.concat(Observable.just(listOf(post1)), Observable.never())
         given(observePostsInteractor.source).willReturn(listPostsObservable)
@@ -130,13 +135,13 @@ class MainViewModelTest {
 
         // expecting the default value + payload
         observer.awaitCount(2).assertValueAt(1, listOf(formattedPost1))
-
+        // not terminated
         observer.awaitTerminalEvent(WONT_HAPPEN_TIMEOUT_MS, TimeUnit.MILLISECONDS)
         observer.assertNotTerminated()
     }
 
     @Test
-    fun `Routes @RefreshInteractor errors to #errorMessage without terminating it`() {
+    fun `Displays error message on evey Refresh command error`() {
         val errorCompletable = Completable.error(Throwable("error"))
         given(refreshInteractor.execution).willReturn(errorCompletable)
         val observer = viewModelUnderTest.errorMessage.test()
@@ -153,7 +158,7 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Sets #refreshIndicator when starts executing Refresh command`() {
+    fun `Sets refresh indicator when starts executing Refresh command`() {
         val observer = viewModelUnderTest.refreshIndicator.test()
         viewModelUnderTest.init()
 
@@ -164,7 +169,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #refreshIndicator when @RefreshInteractor execution completes`() {
+    fun `Clears refresh indicator when Refresh command execution completes`() {
         val executionSubject = PublishSubject.create<Unit>()
         given(refreshInteractor.execution).willReturn(
             Completable.fromObservable(
@@ -184,7 +189,7 @@ class MainViewModelTest {
 
 
     @Test
-    fun `Sets #progressIndicator when @AutoRefreshService#status reports "InProgress"`() {
+    fun `Sets progress indicator when auto-refresh service reports in progress`() {
         given(autoRefreshService.status).willReturn(
             Observable.concat(
                 Observable.just(
@@ -201,7 +206,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #progressIndicator when @AutoRefreshService#status reports "Success"`() {
+    fun `Clears progress indicator when auto-refresh service reports success`() {
         val statusSubject = PublishSubject.create<Status>()
         given(autoRefreshService.status).willReturn(statusSubject)
         val observer = viewModelUnderTest.progressIndicator.test()
@@ -216,7 +221,7 @@ class MainViewModelTest {
     }
 
     @Test
-    fun `Clears #progressIndicator when @AutoRefreshService#status reports "Failure"`() {
+    fun `Clears progress indicator when auto-refresh service reports failure`() {
         val statusSubject = PublishSubject.create<Status>()
         given(autoRefreshService.status).willReturn(statusSubject)
         val observer = viewModelUnderTest.progressIndicator.test()

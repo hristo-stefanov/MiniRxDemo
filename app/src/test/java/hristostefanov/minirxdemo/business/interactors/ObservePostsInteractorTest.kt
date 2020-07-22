@@ -17,9 +17,8 @@ class ObservePostsInteractorTest {
     private val dao = mock(PostDAO::class.java)
     private val unit = ObservePostsInteractor(dao)
 
-    // TODO is the name ok?
     @Test
-    fun `Maps @PostDAO#observePostAndUserSortedByTitleInTx emissions to @PostSummary`() {
+    fun `Provides observable query selecting all post summaries sorted by title`() {
         val observable = Observable.concat(Observable.just(listOf(
             PostAndUser(Post(1, "title", "body",11),
                 User(11, "username"))
@@ -34,7 +33,7 @@ class ObservePostsInteractorTest {
     }
 
     @Test
-    fun `Subscribes on IO scheduler`() {
+    fun `Subscribes to DAO on IO scheduler`() {
         val observableSpy = spy(Observable.never<List<PostAndUser>>())
         given(dao.observePostAndUserSortedByTitleInTx()).willReturn(observableSpy)
 

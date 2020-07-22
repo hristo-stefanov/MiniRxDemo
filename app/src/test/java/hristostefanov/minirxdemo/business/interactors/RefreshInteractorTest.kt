@@ -30,7 +30,7 @@ class RefreshInteractorTest {
     }
 
     @Test
-    fun `Deletes all entities and fetches from remote service`() {
+    fun `Refreshes local data from remote service`() {
         val user1 = UserResource(11, "username")
         val post1 = PostResource(1, 11, "title", "body")
         given(service.getAllUsers()).willReturn(Single.just(listOf(user1)))
