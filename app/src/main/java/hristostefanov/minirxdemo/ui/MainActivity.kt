@@ -25,9 +25,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
 
-        val factory = (application as App).component.getViewModelFactory()
-        viewModel = ViewModelProvider(this, factory)[MainViewModel::class.java]
-
         recyclerView.layoutManager = LinearLayoutManager(this@MainActivity)
 
         swipeRefreshLayout.refreshes().subscribe(viewModel.refreshCommandObserver)
@@ -73,5 +70,4 @@ class MainActivity : AppCompatActivity() {
 
         super.onStop()
     }
-
 }
